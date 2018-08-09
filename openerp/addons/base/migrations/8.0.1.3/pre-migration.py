@@ -30,6 +30,78 @@ xml_ids = [
     ('l10n_gt.rateGTQ', 'base.rateGTQ'),
 ]
 
+unused_modules_70 = [
+    'avanzosc_product_customerinfo',
+    'it',
+    'min_account',
+    'min_account_analytic',
+    'min_account_asset',
+    'min_account_confirming',
+    'min_account_import',
+    'min_account_ini6',
+    'min_account_menu',
+    'min_account_payment',
+    'min_account_payment_file_sepa',
+    'min_account_periodical_invoicing',
+    'min_account_report',
+    'min_account_tax',
+    'min_es_aeat_mod347',
+    'min_facturae',
+    'min_gtin',
+    'min_invoice_picking',
+    'min_last_purchase_product',
+    'min_merge_purchase_order',
+    'min_mrp_product_cost_calculation',
+    'min_pdf',
+    'min_product_bundle',
+    'min_product_product',
+    'min_q43',
+    'min_sepa',
+    'min_stock_diari',
+    'min_stock_invoice',
+    'min_summary_accounting_entries',
+    'min_summary_ accounting_entries',
+    'min_tg_pos_enhanced',
+    'min_tpv_millores',
+    'min_contract_billing',
+    'min_minorisa',
+    'min_project_erp',
+    'min_project_issue',
+    'send_invoices_by_mail',
+    'l10n_cat_account',
+    'l10n_cat_partner_data',
+    'l10n_cat_toponyms',
+    'l10n_es_account',
+    'l10n_es_account_asset',
+    'l10n_es_account_balance_report',
+    'l10n_es_account_invoice_sequence',
+    'l10n_es_account_invoice_sequence_fix',
+    'l10n_es_aeat',
+    'l10n_es_aeat_mod130',
+    'l10n_es_aeat_mod303',
+    'l10n_es_aeat_mod340',
+    'l10n_es_aeat_mod340_type0',
+    'l10n_es_aeat_mod347',
+    'l10n_es_aeat_mod349',
+    'l10n_es_auto_fiscal_position',
+    'l10n_es_bank_statement',
+    'l10n_es_facturae',
+    'l10n_es_fiscal_year_closing',
+    'l10n_es_gestion_comercial',
+    'l10n_es_hr_nominas',
+    'l10n_es_igic',
+    'l10n_es_lopd',
+    'l10n_es_partner',
+    'l10n_es_partner_data',
+    'l10n_es_partner_mercantil',
+    'l10n_es_partner_seq',
+    'l10n_es_payment_order',
+    'l10n_es_prev_tesoreria',
+    'l10n_es_pyme_account',
+    'l10n_es_toponyms',
+    'l10n_es_toponyms_region',
+]
+
 
 def cleanup_modules(cr):
     """Don't report as missing these modules, as they are integrated in
@@ -44,6 +116,43 @@ def cleanup_modules(cr):
             ('stock_cancel', 'stock_picking_back2draft'),
         ], merge_modules=True,
     )
+
+
+def clean_write_uids(cr):
+    """Some records are missing proper user IDs in write_uid due to a
+    poor legacy Pentaho import from 5.0"""
+    cr.execute("SELECT table_name FROM information_schema.columns "
+               "WHERE table_schema='public' AND column_name='create_uid'")
+    tables = cr.fetchall()
+    for table in tables:
+        cr.execute("""
+        UPDATE %s SET write_uid = 1
+        WHERE write_uid NOT IN (
+            SELECT id FROM res_users
+            )
+        """ % table[0])
+        cr.execute("""
+        UPDATE %s SET create_uid = 1
+        WHERE create_uid NOT IN (
+            SELECT id FROM res_users
+            )
+        """ % table[0])
+
+
+def remove_unused_views(cr):
+    for module in unused_modules_70:
+        cr.execute("""
+            DELETE FROM ir_ui_view WHERE id IN 
+                (SELECT res_id FROM ir_model_data 
+                    WHERE model = 'ir.ui.view' AND module = '%s')
+        """ % module)
+
+
+def mark_unused_modules_uninstalled(cr):
+    for module in unused_modules_70:
+        cr.execute("""
+        UPDATE ir_module_module SET state = 'uninstalled' WHERE name = '%s'
+        """ % module)
 
 
 @openupgrade.migrate()
@@ -62,8 +171,8 @@ def migrate(cr, version):
         cr, 'ir_ui_view', 'type', [
             'calendar', 'diagram', 'form', 'gantt', 'graph', 'kanban',
             'qweb', 'search', 'tree'])
-    
-    # The tables stock.picking.in and stock.picking.out are merged into 
+
+    # The tables stock.picking.in and stock.picking.out are merged into
     # stock.picking
     openupgrade.logged_query(
         cr, """
@@ -71,7 +180,7 @@ def migrate(cr, version):
         SET res_model = 'stock.picking'
         WHERE res_model in ('stock.picking.in', 'stock.picking.out');
         """)
-    
+
     # Product.template is used for non variant product in v7 this was
     # product.product
     openupgrade.logged_query(
@@ -82,3 +191,6 @@ def migrate(cr, version):
         """)
 
     cleanup_modules(cr)
+    clean_write_uids(cr)
+    # remove_unused_views(cr)
+    # mark_unused_modules_uninstalled(cr)

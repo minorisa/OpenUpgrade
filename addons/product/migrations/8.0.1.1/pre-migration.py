@@ -48,3 +48,7 @@ column_renames = {
 @openupgrade.migrate()
 def migrate(cr, version):
     openupgrade.rename_columns(cr, column_renames)
+
+    # Sync product_category sequence
+    cr.execute("SELECT setval('product_category_id_seq', "
+               "(SELECT MAX(id) FROM product_category) + 1)")
