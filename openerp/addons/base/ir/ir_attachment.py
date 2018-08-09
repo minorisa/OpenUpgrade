@@ -7,6 +7,7 @@ import logging
 import mimetypes
 import os
 import re
+import base64
 
 from openerp import SUPERUSER_ID, tools
 from openerp.exceptions import AccessError
@@ -108,7 +109,10 @@ class ir_attachment(osv.osv):
         return r
 
     def _file_write(self, cr, uid, value, checksum):
-        bin_value = value.decode('base64')
+        try:
+            bin_value = base64.b64decode(value)
+        except TypeError:
+            bin_value = ''
         fname, full_path = self._get_path(cr, uid, bin_value, checksum)
         if not os.path.exists(full_path):
             try:
@@ -146,7 +150,15 @@ class ir_attachment(osv.osv):
 
     def _data_set(self, cr, uid, id, name, value, arg, context=None):
         # compute the field depending of datas, supporting the case of a empty/None datas
-        bin_data = value and value.decode('base64') or '' # empty string to compute its hash
+        # empty string to compute its hash
+        if value:
+            try:
+                bin_data = base64.b64decode(value) or ''
+            except TypeError:
+                bin_data = ''
+        else:
+            bin_data = ''
+
         checksum = self._compute_checksum(bin_data)
         vals = {
             'file_size': len(bin_data),
@@ -207,7 +219,10 @@ class ir_attachment(osv.osv):
         if not mimetype and values.get('url'):
             mimetype = mimetypes.guess_type(values['url'])[0]
         if values.get('datas') and (not mimetype or mimetype == 'application/octet-stream'):
-            mimetype = guess_mimetype(values['datas'].decode('base64'))
+            try:
+                mimetype = guess_mimetype(base64.b64decode(values['datas']))
+            except TypeError:
+                mimetype = 'application/octet-stream'
         return mimetype or 'application/octet-stream'
 
     def _check_contents(self, cr, uid, values, context=None):
