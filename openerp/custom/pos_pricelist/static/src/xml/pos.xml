@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-extend="Product">
+        <t t-jquery=".product-img" t-operation="replace">
+            <div class="product-img">
+                <img t-att-src='image_url' />
+                <t t-if="!product.to_weight">
+                    <span class="price-tag">
+                        <t t-if="widget.display_price_with_taxes">
+                            <t t-esc="widget.format_currency(product.price_with_taxes,'Product Price')"/>
+                        </t>
+                        <t t-if="!widget.display_price_with_taxes">
+                            <t t-esc="widget.format_currency(product.price,'Product Price')"/>
+                        </t>
+                    </span>
+                </t>
+                <t t-if="product.to_weight">
+                    <span class="price-tag">
+                        <t t-if="widget.display_price_with_taxes">
+                            <t t-esc="widget.format_currency(product.price_with_taxes,'Product Price')+'/Kg'"/>
+                        </t>
+                        <t t-if="!widget.display_price_with_taxes">
+                            <t t-esc="widget.format_currency(product.price,'Product Price')+'/Kg'"/>
+                        </t>
+                    </span>
+                </t>
+            </div>
+        </t>
+    </t>
+    <t t-extend="PosTicket">
+        <t t-jquery="t[t-esc='orderline.get_quantity_str_with_unit()']" t-operation="after">
+            <t t-if="orderline.quantity != 1">
+                x<t t-esc="widget.format_pr(orderline.get_display_unit_price())"/>
+            </t>
+        </t>
+    </t>
+
+    <t t-extend="ClientDetails">
+        <t t-jquery=".client-details-right" t-operation="append">
+            <div class='client-detail'>
+                <span class='label'>Pricelist</span>
+                <t t-if='partner.property_product_pricelist'>
+                    <span class='detail pricelist'><t t-esc='partner.property_product_pricelist[1]'/></span>
+                </t>
+                <t t-if='!partner.property_product_pricelist'>
+                    <span class='detail pricelist empty'>N/A</span>
+                </t>
+            </div>
+        </t>
+    </t>
+
+    <t t-extend="ClientDetailsEdit">
+        <t t-jquery=".client-details-right" t-operation="append">
+            <div class='client-detail'>
+                <span class='label'>Pricelist</span>
+                <select class='detail client-pricelist_id needsclick' name='property_product_pricelist'>
+                    <option value=''></option>
+                    <t t-foreach='widget.pos.db.pricelist_by_id' t-as='pricelist_id'>
+                        <t t-set="pricelist" t-value="widget.pos.db.pricelist_by_id[pricelist_id]"/>
+                        <option t-att-value='pricelist.id' t-att-selected="partner.property_product_pricelist ? ((pricelist.id === partner.property_product_pricelist[0]) ? true : undefined) : undefined">
+                            <t t-esc='pricelist.name'/>
+                        </option>
+                    </t>
+                </select>
+            </div>
+        </t>
+    </t>
+
+</templates>

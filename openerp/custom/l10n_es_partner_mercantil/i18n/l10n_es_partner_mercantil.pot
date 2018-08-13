@@ -1,13 +1,11 @@
-# Translation of OpenERP Server.
+# Translation of Odoo Server.
 # This file contains the translation of the following modules:
 #	* l10n_es_partner_mercantil
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: OpenERP Server 7.0\n"
+"Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-10 15:45+0000\n"
-"PO-Revision-Date: 2014-07-10 15:45+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -21,7 +19,7 @@ msgid "Book"
 msgstr ""
 
 #. module: l10n_es_partner_mercantil
-#: view:res.partner:0
+#: view:res.partner:l10n_es_partner_mercantil.view_partner_form_mercantil
 msgid "Commercial Info"
 msgstr ""
 
@@ -31,7 +29,7 @@ msgid "Commercial Registry"
 msgstr ""
 
 #. module: l10n_es_partner_mercantil
-#: view:res.partner:0
+#: view:res.partner:l10n_es_partner_mercantil.view_partner_form_mercantil
 msgid "Internal Notes"
 msgstr ""
 
@@ -41,9 +39,7 @@ msgid "Page"
 msgstr ""
 
 #. module: l10n_es_partner_mercantil
-#: code:_description:0
 #: model:ir.model,name:l10n_es_partner_mercantil.model_res_partner
-#, python-format
 msgid "Partner"
 msgstr ""
 

@@ -30,6 +30,49 @@ from openerp import SUPERUSER_ID
 from openerp.openupgrade import openupgrade
 logger = logging.getLogger('OpenUpgrade.deferred')
 
+unused_modules_80 = (
+    'avanzosc_product_customerinfo',
+    'it',
+    'min_account',
+    'min_account_analytic',
+    'min_account_asset',
+    'min_account_confirming',
+    'min_account_import',
+    'min_account_ini6',
+    'min_account_menu',
+    'min_account_payment',
+    'min_account_payment_file_sepa',
+    'min_account_periodical_invoicing',
+    'min_account_report',
+    'min_account_tax',
+    'min_es_aeat_mod347',
+    'min_facturae',
+    'min_gtin',
+    'min_invoice_picking',
+    'min_last_purchase_product',
+    'min_merge_purchase_order',
+    'min_mrp_product_cost_calculation',
+    'min_pdf',
+    'min_product_bundle',
+    'min_product_product',
+    'min_q43',
+    'min_sepa',
+    'min_stock_diari',
+    'min_stock_invoice',
+    'min_summary_accounting_entries',
+    'min_summary_ accounting_entries',
+    'min_tg_pos_enhanced',
+    'min_tpv_millores',
+    'min_contract_billing',
+    'min_minorisa',
+    'min_project_erp',
+    'min_project_issue',
+    'send_invoices_by_mail',
+    'l10n_cat_account',
+    'l10n_cat_partner_data',
+    'l10n_cat_toponyms',
+)
+
 
 def migrate_product_valuation(cr, pool):
     """Migrate the product valuation to a property field on product template.
@@ -200,7 +243,20 @@ def migrate_stock_move_warehouse(cr):
         """)
 
 
+def uninstall_unused_modules(cr, pool):
+    openupgrade.logged_query(
+        cr,
+        """
+        UPDATE ir_module_module
+        SET state = 'to remove'
+        WHERE name in %s
+        """,
+        (unused_modules_80,)
+    )
+
+
 def migrate_deferred(cr, pool):
     migrate_product_valuation(cr, pool)
     migrate_procurement_order_method(cr, pool)
     migrate_stock_move_warehouse(cr)
+    # uninstall_unused_modules(cr, pool)

@@ -84,3 +84,21 @@ def migrate(cr, version):
         "using ir_model_data d where "
         "v.id=d.res_id and d.model='ir.ui.view' and "
         "d.name='account_report_company_invoice_report_tree_view'")
+
+    # Create field amount_total_wo_irpf in account_invoice and
+    # initialize it to 0.0, to bypass storing computed value
+    openupgrade.logged_query(
+        cr,
+        """
+        ALTER TABLE account_invoice 
+        ADD COLUMN amount_total_wo_irpf NUMERIC
+        DEFAULT 0.0
+        """
+    )
+
+    # Sync account tax code sequence
+    openupgrade.logged_query(
+        cr,
+        "SELECT setval('account_tax_code_id_seq', "
+        "(SELECT MAX(id) FROM account_tax_code) + 1)"
+    )
