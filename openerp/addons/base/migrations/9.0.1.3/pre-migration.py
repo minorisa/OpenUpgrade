@@ -49,8 +49,11 @@ def cleanup_modules(cr):
             ('account_chart', 'account'),
             ('account_followup', 'account_credit_control'),
             ('contacts', 'mail'),
+            ('im_chat', 'mail'),
             ('marketing_crm', 'crm'),
             ('email_template', 'mail'),  # mail_template class
+            ('portal_project', 'project'),
+            ('portal_project_issue', 'project_issue'),
             ('procurement_jit_stock', 'procurement_jit'),
             ('web_gantt', 'web'),
             ('web_graph', 'web'),
@@ -74,6 +77,8 @@ def cleanup_modules(cr):
             ('account_bank_statement_period_from_line_date', 'account'),
             # from OCA/connector-telephony
             ('asterisk_click2dial_crm', 'crm_phone'),
+            # from OCA/product-attribute
+            ('product_pricelist_fixed_price', 'product'),
             # from OCA/server-tools - features included now in core
             ('base_concurrency', 'base'),
             ('base_debug4all', 'base'),
