@@ -16,4 +16,5 @@ def prevent_banks_deletion(cr):
 
 
 def migrate(cr, version):
-    prevent_banks_deletion(cr)
+    # prevent_banks_deletion(cr)
+    pass
