@@ -119,7 +119,9 @@ class product_uom(osv.osv):
             context = {}
         if from_unit.category_id.id != to_unit.category_id.id:
             if context.get('raise-exception', True):
-                raise UserError(_('Conversion from Product UoM %s to Default UoM %s is not possible as they both belong to different Category!.') % (from_unit.name,to_unit.name))
+                # Minorisa
+                return qty
+                # raise UserError(_('Conversion from Product UoM %s to Default UoM %s is not possible as they both belong to different Category!.') % (from_unit.name,to_unit.name))
             else:
                 return qty
         amount = qty/from_unit.factor
@@ -848,7 +850,7 @@ class product_product(osv.osv):
             value = product_uom_obj._compute_price(cr, uid,
                     context['uom'], value, uom.id)
         value =  value - product.price_extra
-        
+
         return product.write({'list_price': value})
 
     def _get_partner_code_name(self, cr, uid, ids, product, partner_id, context=None):
@@ -981,7 +983,7 @@ class product_product(osv.osv):
         'image_medium': fields.function(_get_image_variant, fnct_inv=_set_image_variant,
             string="Medium-sized image", type="binary",
             help="Image of the product variant (Medium-sized image of product template if false)."),
-        'standard_price': fields.property(type = 'float', digits_compute=dp.get_precision('Product Price'), 
+        'standard_price': fields.property(type = 'float', digits_compute=dp.get_precision('Product Price'),
                                           help="Cost of the product template used for standard stock valuation in accounting and used as a base price on purchase orders. "
                                                "Expressed in the default unit of measure of the product.",
                                           groups="base.group_user", string="Cost"),
