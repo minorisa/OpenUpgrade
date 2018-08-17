@@ -1,0 +1,198 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * contract_variable_quantity
+# 
+# Translators:
+# OCA Transbot <transbot@odoo-community.org>, 2016
+# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2017
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 9.0c\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-18 01:38+0000\n"
+"PO-Revision-Date: 2017-03-18 01:38+0000\n"
+"Last-Translator: Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2017\n"
+"Language-Team: Catalan (https://www.transifex.com/oca/teams/23907/ca/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Language: ca\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid ""
+"<code>\n"
+"                                    result = env['product.product'].search_count([('sale_ok', '=', True)])\n"
+"                                </code>"
+msgstr ""
+"<code>\n"
+"                                    result = env['product.product'].search_count([('sale_ok', '=', True)])\n"
+"                                </code>"
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "<i>context</i>: Current context dictionary."
+msgstr "<i>context</i>: Diccionari de conteste actual."
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "<i>contract</i>: Contract whose line belongs to."
+msgstr "<i>contract</i>: Contracte al que pertany aquesta línia."
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "<i>env</i>: Environment variable for getting other models."
+msgstr "<i>env</i>: Variable d'entorn per obtenir els altres models."
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "<i>invoice</i>: Invoice (header) being created."
+msgstr "<i>invoice</i>: Creant Factura (capçalera). "
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid ""
+"<i>line</i>: Contract recurring invoice line that triggers this formula."
+msgstr ""
+"<i>line</i>: Línia del contractes de facturació recurrent que llança aquesta"
+" fórmula. "
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "<i>user</i>: Current user."
+msgstr "<i>user</i>: Usuari actual."
+
+#. module: contract_variable_quantity
+#: model:ir.model,name:contract_variable_quantity.model_account_analytic_account
+msgid "Analytic Account"
+msgstr "Compte analític"
+
+#. module: contract_variable_quantity
+#: model:ir.actions.act_window,help:contract_variable_quantity.action_contract_quantity_formula
+msgid "Click to create a new formula for variable quantities."
+msgstr "Clic per crear una nova fórmula per quantitats variables."
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula_code
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "Code"
+msgstr "Codi"
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula_create_uid
+msgid "Created by"
+msgstr "Creat per"
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula_create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula_display_name
+msgid "Display Name"
+msgstr "Veure el nom"
+
+#. module: contract_variable_quantity
+#: code:addons/contract_variable_quantity/models/contract.py:64
+#, python-format
+msgid ""
+"Error evaluating code.\n"
+"Details: %s"
+msgstr ""
+"Error avaluant el codi.\n"
+"Detalls: %s"
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "Example of Python code"
+msgstr "Exemple de codi Python"
+
+#. module: contract_variable_quantity
+#: selection:account.analytic.invoice.line,qty_type:0
+msgid "Fixed quantity"
+msgstr "Quantitat fixa"
+
+#. module: contract_variable_quantity
+#: model:ir.actions.act_window,name:contract_variable_quantity.action_contract_quantity_formula
+#: model:ir.ui.menu,name:contract_variable_quantity.menu_contract_quantity_formula
+msgid "Formulas (quantity)"
+msgstr "Fórmules (quantitat)"
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "Help with Python expressions."
+msgstr "Ajuda amb les expressions Python."
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula_id
+msgid "ID"
+msgstr "ID"
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula___last_update
+msgid "Last Modified on"
+msgstr "Darrera modificació el"
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula_write_uid
+msgid "Last Updated by"
+msgstr "Darrera Actualització per"
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula_write_date
+msgid "Last Updated on"
+msgstr "Darrera Actualització el"
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_contract_line_qty_formula_name
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "Name"
+msgstr "Nom"
+
+#. module: contract_variable_quantity
+#: code:addons/contract_variable_quantity/models/contract.py:66
+#, python-format
+msgid "No valid result returned."
+msgstr "Resultat retornat no vàlid."
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_account_analytic_invoice_line_qty_formula_id
+msgid "Qty. formula"
+msgstr "Quant. fórmula "
+
+#. module: contract_variable_quantity
+#: model:ir.model.fields,field_description:contract_variable_quantity.field_account_analytic_invoice_line_qty_type
+msgid "Qty. type"
+msgstr "Quant. tipus"
+
+#. module: contract_variable_quantity
+#: selection:account.analytic.invoice.line,qty_type:0
+msgid "Variable quantity"
+msgstr "Quantitat variable"
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid "You can use these variables to compute your formula:"
+msgstr "Podeu utilitzar aquestes variables per a calcular la vostra formula:"
+
+#. module: contract_variable_quantity
+#: model:ir.ui.view,arch_db:contract_variable_quantity.view_contract_line_qty_formula_form
+msgid ""
+"You have to insert valid Python code block that stores at some moment a "
+"float/integer value of the quantity to invoice in the variable 'result'."
+msgstr ""
+"Heu d'inserir un bloc de codi Python vàlid que emmagatzemi en algun moment "
+"un valor sencer o decimal de la quantitat a facturar a la variable 'result'."
+" "
+
+#. module: contract_variable_quantity
+#: model:ir.model,name:contract_variable_quantity.model_account_analytic_invoice_line
+msgid "account.analytic.invoice.line"
+msgstr "account.analytic.invoice.line"
+
+#. module: contract_variable_quantity
+#: model:ir.model,name:contract_variable_quantity.model_contract_line_qty_formula
+msgid "contract.line.qty.formula"
+msgstr "contract.line.qty.formula"
