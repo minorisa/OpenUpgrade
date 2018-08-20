@@ -76,6 +76,7 @@ def convert_issues(env):
                 'name': project.name + ' (Issues)',
                 'task_ids': False,
                 'label_tasks': row['label_issues'],
+                'privacy_visibility': 'portal',
             })
             # Track from what project this was duplicated
             env.cr.execute(

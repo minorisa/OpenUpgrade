@@ -254,7 +254,7 @@ class IrMailServer(models.Model):
         """Constructs an RFC2822 email.message.Message object based on the keyword arguments passed, and returns it.
 
            :param string email_from: sender email address
-           :param list email_to: list of recipient addresses (to be joined with commas) 
+           :param list email_to: list of recipient addresses (to be joined with commas)
            :param string subject: email subject (no pre-encoding/quoting necessary)
            :param string body: email body, of the type ``subtype`` (by default, plaintext).
                                If html subtype is used, the message will be automatically converted
@@ -414,6 +414,10 @@ class IrMailServer(models.Model):
         # Use the default bounce address **only if** no Return-Path was
         # provided by caller.  Caller may be using Variable Envelope Return
         # Path (VERP) to detect no-longer valid email addresses.
+
+        # Minorisa
+        return False
+
         smtp_from = message['Return-Path'] or self._get_default_bounce_address() or message['From']
         assert smtp_from, "The Return-Path or From header is required for any outbound email"
 
@@ -444,12 +448,17 @@ class IrMailServer(models.Model):
             message['To'] = x_forge_to
 
         # Do not actually send emails in testing mode!
-        if getattr(threading.currentThread(), 'testing', False) or self.env.registry.in_test_mode():
-            _test_logger.info("skip sending email in test mode")
+        # Minorisa
+        if True or getattr(threading.currentThread(), 'testing', False) or self.env.registry.in_test_mode():
+            # _test_logger.info("skip sending email in test mode")
+            _logger.info("skip sending email in migration")
             return message['Message-Id']
 
         try:
             message_id = message['Message-Id']
+            # Minorisa
+            _logger.info(message_id)
+            return message_id
             smtp = smtp_session
             try:
                 smtp = smtp or self.connect(
