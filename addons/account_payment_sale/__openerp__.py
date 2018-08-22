@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#    'Point Of Sale' migration module for Odoo
-#    copyright: 2014-Today GRAP
-#    @author: Sylvain LE GAL <https://twitter.com/legalsylvain>
+#    Account Payment Sale module for OpenERP
+#    Copyright (C) 2014 Akretion (http://www.akretion.com).
+#    @author Alexis de Lattre <alexis.delattre@akretion.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -20,22 +20,24 @@
 #
 ##############################################################################
 
-from openerp.openupgrade import openupgrade
-
-column_renames = {
-    'pos_config': [
-        ('shop_id', None),
-        ],
-    'product_product': [
-        ('available_in_pos', None),
-        ('expense_pdt', None),
-        ('income_pdt', None),
-        ('pos_categ_id', None),
-        ('to_weight', None),
+{
+    'name': 'Account Payment Sale',
+    'version': '8.0.1.0.0',
+    'category': 'Banking addons',
+    'license': 'AGPL-3',
+    'summary': "Adds payment mode on sale orders",
+    'author': "Akretion, "
+              "Serv. Tecnol. Avanzados - Pedro M. Baeza, "
+              "Odoo Community Association (OCA)",
+    'website': 'https://github.com/OCA/bank-payment',
+    'depends': [
+        'sale',
+        'account_payment_partner'
     ],
+    'conflicts': ['sale_payment'],
+    'data': [
+        'views/sale_order_view.xml',
+    ],
+    'installable': True,
+    'auto_install': True,
 }
-
-
-# @openupgrade.migrate(no_version=True)
-# def migrate(cr, version):
-#     openupgrade.rename_columns(cr, column_renames)

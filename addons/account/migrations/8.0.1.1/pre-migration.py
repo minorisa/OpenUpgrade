@@ -102,3 +102,13 @@ def migrate(cr, version):
         "SELECT setval('account_tax_code_id_seq', "
         "(SELECT MAX(id) FROM account_tax_code) + 1)"
     )
+
+    # Populate payment mode field -> should be moved to migration to 11.0
+    # openupgrade.logged_query(
+    #     cr, """
+    #     UPDATE account_move_line
+    #     SET payment_mode_id = account_cartera.payment_id
+    #     FROM account_cartera
+    #     WHERE account_move_line.cartera_id = account_cartera.id
+    #     """
+    # )

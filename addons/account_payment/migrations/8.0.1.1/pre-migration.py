@@ -28,6 +28,11 @@ tables_to_rename = [
     ('payment_type', 'payment_mode')
 ]
 
+models_to_rename = [
+    ('payment.mode', 'payment.mode.type'),
+    ('payment.type', 'payment.mode')
+]
+
 xmlids_view = (
     'view_payment_type_tree',
     'view_payment_type_form',
@@ -41,6 +46,7 @@ xmlids_menu = (
 
 @openupgrade.migrate()
 def migrate(cr, version):
+
     openupgrade.rename_tables(cr, tables_to_rename)
 
     # First delete inherited views for payment type
