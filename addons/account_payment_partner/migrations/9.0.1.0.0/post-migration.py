@@ -9,49 +9,41 @@ from openupgradelib import openupgrade
 def migrate(env, version):
 
     # Payment mode properties for res.partner
-    openupgrade.logged_query(
-        env.cr, """
-        UPDATE ir_property
-        SET value_reference = regexp_replace(
-            value_reference, %(old_pattern)s, %(new_pattern)s
-        ), 
-        name = 'supplier_payment_mode',
-        fields_id = (
-            SELECT id FROM ir_model_fields 
-            WHERE name = 'supplier_payment_mode'
-              AND model = 'res.partner' AND ttype = 'many2one' 
-        )
-        WHERE name = 'payment_type_supplier'
-        AND value_reference ~ %(old_pattern)s""", {
-            'old_pattern': r"^payment.type,[ ]*([0-9]*)",
-            'new_pattern': r"payment.mode,\1",
-        }
-    )
-    openupgrade.logged_query(
-        env.cr, """
-        UPDATE ir_property
-        SET value_reference = regexp_replace(
-            value_reference, %(old_pattern)s, %(new_pattern)s
-        ), name = 'customer_payment_mode',
-        fields_id = (
-            SELECT id FROM ir_model_fields 
-            WHERE name = 'customer_payment_mode'
-              AND model = 'res.partner' AND ttype = 'many2one' 
-        )
-        WHERE name = 'payment_type_customer'
-        AND value_reference ~ %(old_pattern)s""", {
-            'old_pattern': r"^payment.type,[ ]*([0-9]*)",
-            'new_pattern': r"payment.mode,\1",
-        }
-    )
-
-    # Payment mode for account_invoice
-    openupgrade.logged_query(
-        env.cr, """
-        UPDATE account_invoice
-        SET payment_mode_id = payment_type
-        """
-    )
+    # openupgrade.logged_query(
+    #     env.cr, """
+    #     UPDATE ir_property
+    #     SET value_reference = regexp_replace(
+    #         value_reference, %(old_pattern)s, %(new_pattern)s
+    #     ),
+    #     name = 'supplier_payment_mode',
+    #     fields_id = (
+    #         SELECT id FROM ir_model_fields
+    #         WHERE name = 'supplier_payment_mode'
+    #           AND model = 'res.partner' AND ttype = 'many2one'
+    #     )
+    #     WHERE name = 'payment_type_supplier'
+    #     AND value_reference ~ %(old_pattern)s""", {
+    #         'old_pattern': r"^payment.type,[ ]*([0-9]*)",
+    #         'new_pattern': r"payment.mode,\1",
+    #     }
+    # )
+    # openupgrade.logged_query(
+    #     env.cr, """
+    #     UPDATE ir_property
+    #     SET value_reference = regexp_replace(
+    #         value_reference, %(old_pattern)s, %(new_pattern)s
+    #     ), name = 'customer_payment_mode',
+    #     fields_id = (
+    #         SELECT id FROM ir_model_fields
+    #         WHERE name = 'customer_payment_mode'
+    #           AND model = 'res.partner' AND ttype = 'many2one'
+    #     )
+    #     WHERE name = 'payment_type_customer'
+    #     AND value_reference ~ %(old_pattern)s""", {
+    #         'old_pattern': r"^payment.type,[ ]*([0-9]*)",
+    #         'new_pattern': r"payment.mode,\1",
+    #     }
+    # )
 
     # Copy mandate_id to account_move_line
     sql = """
