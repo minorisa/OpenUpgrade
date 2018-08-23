@@ -96,6 +96,23 @@ def migrate(cr, version):
         """
     )
 
+    # Pre-add payment_mode_id to retain old values
+    openupgrade.logged_query(
+        cr,
+        """
+        ALTER TABLE account_invoice 
+        ADD COLUMN payment_mode_id INTEGER
+        """
+    )
+
+    # Payment mode for account_invoice
+    openupgrade.logged_query(
+        cr, """
+        UPDATE account_invoice
+        SET payment_mode_id = payment_type
+        """
+    )
+
     # Sync account tax code sequence
     openupgrade.logged_query(
         cr,
