@@ -145,6 +145,22 @@ def fill_cron_action_server_post(env):
         )
 
 
+def clean_unused_actions(cr):
+    openupgrade.logged_query(
+        cr, """
+        DELETE FROM ir_act_client WHERE tag = 'mail.wall'
+        """
+    )
+    openupgrade.logged_query(
+        cr, """
+        DELETE FROM ir_act_window 
+        WHERE res_model NOT IN (
+            SELECT model FROM ir_model
+        )
+        """
+    )
+
+
 @openupgrade.migrate()
 def migrate(env, version):
     map_ir_actions_server_fields(env.cr)
@@ -154,3 +170,5 @@ def migrate(env, version):
     openupgrade.load_data(
         env.cr, 'base', 'migrations/11.0.1.3/noupdate_changes.xml',
     )
+    # Minorisa
+    clean_unused_actions(env.cr)
