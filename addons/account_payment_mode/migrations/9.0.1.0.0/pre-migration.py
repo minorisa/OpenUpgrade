@@ -7,13 +7,5 @@ from openupgradelib import openupgrade
 
 def migrate(cr, version=None):
 
-    # Payment mode for account_invoice
-    openupgrade.logged_query(
-        cr, """
-        UPDATE account_invoice
-        SET payment_mode_id = payment_type
-        """
-    )
-
     # also support cases where openupgrade renamed the old module
     migrate_from_8(cr)
