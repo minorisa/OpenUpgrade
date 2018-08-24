@@ -15,16 +15,16 @@ def migrate(env, version):
         SET value_reference = regexp_replace(
             value_reference, %(old_pattern)s, %(new_pattern)s
         ),
-        name = 'supplier_payment_mode',
+        name = 'supplier_payment_mode_id',
         fields_id = (
             SELECT id FROM ir_model_fields
-            WHERE name = 'supplier_payment_mode'
+            WHERE name = 'supplier_payment_mode_id'
               AND model = 'res.partner' AND ttype = 'many2one'
         )
         WHERE name = 'payment_type_supplier'
         AND value_reference ~ %(old_pattern)s""", {
             'old_pattern': r"^payment.type,[ ]*([0-9]*)",
-            'new_pattern': r"payment.mode,\1",
+            'new_pattern': r"account.payment.mode,\1",
         }
     )
     openupgrade.logged_query(
@@ -32,16 +32,16 @@ def migrate(env, version):
         UPDATE ir_property
         SET value_reference = regexp_replace(
             value_reference, %(old_pattern)s, %(new_pattern)s
-        ), name = 'customer_payment_mode',
+        ), name = 'customer_payment_mode_id',
         fields_id = (
             SELECT id FROM ir_model_fields
-            WHERE name = 'customer_payment_mode'
+            WHERE name = 'customer_payment_mode_id'
               AND model = 'res.partner' AND ttype = 'many2one'
         )
         WHERE name = 'payment_type_customer'
         AND value_reference ~ %(old_pattern)s""", {
             'old_pattern': r"^payment.type,[ ]*([0-9]*)",
-            'new_pattern': r"payment.mode,\1",
+            'new_pattern': r"account.payment.mode,\1",
         }
     )
 
