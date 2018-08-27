@@ -1131,6 +1131,25 @@ def fill_bank_accounts(cr):
     )
 
 
+# Minorisa
+def revert_min_refund_invoices(env):
+    """
+    From PRO: revert amounts sign for *_refund invoice type
+    """
+    invobj = env["account.invoice"]
+    for inv in invobj.search([
+        ('type', 'in', ('out_refund', 'in_refund'))
+    ]):
+        for line in inv.invoice_line_ids:
+            if line.price_unit > 0.00:
+                line.quantity *= -1.00
+            else:
+                if line.quantity < 0.00:
+                    line.quantity *= -1.00
+                else:
+                    line.price_unit *= -1.00
+
+
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     cr = env.cr
@@ -1234,3 +1253,5 @@ def migrate(env, version):
     openupgrade.load_data(
         cr, 'account', 'migrations/9.0.1.1/noupdate_changes.xml',
     )
+
+    revert_min_refund_invoices(env)
