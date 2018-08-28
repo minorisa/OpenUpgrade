@@ -233,6 +233,18 @@ def migrate(env, version):
     _fill_line_data(env)
     _create_analytic_account_records(env)
     _invoice_set_contract_reference(env)
+
+    # Minorisa: Update filters associated to
+    # account.periodical_invoicing.agreement.line
+    # Otherwise, it fails in deferred actions
+    openupgrade.logged_query(
+        env.cr, """
+        UPDATE ir_filters
+        SET model_id = 'account.analytic.invoice.line'
+        WHERE model_id = 'account.periodical_invoicing.agreement.line'
+        """
+    )
+
     # mark contract module to be upgraded
     env.cr.execute("UPDATE ir_module_module SET state = 'to upgrade' "
                    "WHERE name = 'contract'")
