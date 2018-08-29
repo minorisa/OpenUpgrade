@@ -9,5 +9,5 @@ def migrate(cr, version):
     if not version:
         return
 
-    if openupgrade.column_exists('res_partner_bank', 'acc_type'):
+    if openupgrade.column_exists(cr, 'res_partner_bank', 'acc_type'):
         cr.execute('ALTER TABLE res_partner_bank DROP COLUMN acc_type')
