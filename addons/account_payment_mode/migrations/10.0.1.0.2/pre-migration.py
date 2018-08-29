@@ -2,9 +2,12 @@
 # Copyright 2018 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+from openupgradelib import openupgrade
+
 
 def migrate(cr, version):
     if not version:
         return
 
-    cr.execute('ALTER TABLE res_partner_bank DROP COLUMN acc_type')
+    if openupgrade.column_exists('res_partner_bank', 'acc_type'):
+        cr.execute('ALTER TABLE res_partner_bank DROP COLUMN acc_type')
