@@ -7,6 +7,7 @@ from openupgradelib import openupgrade
 
 @openupgrade.migrate()
 def migrate(cr, version):
+    a = "dumb"
     # cr.execute(
     #     "alter table crm_claim_category add column lead_tag_id int")
     # cr.execute(
