@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ir_attachment
-# import mrp_workorder
+import mrp_workorder
 import mrp_config_settings
 import mrp_bom
 import mrp_message
