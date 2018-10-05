@@ -85,3 +85,14 @@ def migrate(cr, version):
             ('web_easy_switch_company', 'web'),
         ], merge_modules=True,
     )
+
+    openupgrade.logged_query(
+        cr, """
+        UPDATE res_country_state SET code = 'RN1'
+        WHERE country_id = 32 AND code = 'RN';
+        UPDATE res_country_state SET code = 'SP1'
+        WHERE country_id = 32 AND code = 'SP';
+        UPDATE res_country_state SET code = 'QC1'
+        WHERE country_id = 39 AND code = 'QC'
+        """
+    )
