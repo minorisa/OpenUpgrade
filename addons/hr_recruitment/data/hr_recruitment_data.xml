@@ -145,9 +145,11 @@ joining us as a ${object.job_id.name}
     </record>
 
     <!-- Applicant Categories(Tag) -->
+    <!--
     <record id="tag_applicant_reserve" model="hr.applicant.category">
         <field name="name">Reserve</field>
     </record>
+    -->
     <record id="tag_applicant_manager" model="hr.applicant.category">
         <field name="name">Manager</field>
     </record>
