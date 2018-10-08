@@ -3162,7 +3162,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 self._table, ','.join('"%s"=%s' % (u[0], u[1]) for u in updates),
             )
             params = tuple(u[2] for u in updates if len(u) > 2)
-            for sub_ids in cr.split_for_in_conditions(set(self.ids.filtered(lambda x: isinstance(x.id, int)))):
+            for sub_ids in cr.split_for_in_conditions(set(filter(
+                    lambda x: isinstance(x, int), self.ids))):
                 cr.execute(query, params + (sub_ids,))
                 if cr.rowcount != len(sub_ids):
                     raise MissingError(_('One of the records you are trying to modify has already been deleted (Document type: %s).') % self._description)
