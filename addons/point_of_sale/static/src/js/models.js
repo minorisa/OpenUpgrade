@@ -245,6 +245,8 @@ exports.PosModel = Backbone.Model.extend({
 
             self.db.set_uuid(self.config.uuid);
             self.set_cashier(self.get_cashier());
+            // We need to do it here, since only then the local storage has the correct uuid
+            self.db.save('pos_session_id', self.pos_session.id);
 
             var orders = self.db.get_orders();
             for (var i = 0; i < orders.length; i++) {
@@ -259,6 +261,7 @@ exports.PosModel = Backbone.Model.extend({
             // we attribute a role to the user, 'cashier' or 'manager', depending
             // on the group the user belongs.
             var pos_users = [];
+            var current_cashier = self.get_cashier();
             for (var i = 0; i < users.length; i++) {
                 var user = users[i];
                 for (var j = 0; j < user.groups_id.length; j++) {
@@ -276,6 +279,8 @@ exports.PosModel = Backbone.Model.extend({
                 // replace the current user with its updated version
                 if (user.id === self.user.id) {
                     self.user = user;
+                }
+                if (user.id === current_cashier.id) {
                     self.set_cashier(user);
                 }
             }
@@ -326,8 +331,8 @@ exports.PosModel = Backbone.Model.extend({
         },
     },{
         model: 'res.currency',
-        fields: ['name','symbol','position','rounding'],
-        ids:    function(self){ return [self.config.currency_id[0]]; },
+        fields: ['name','symbol','position','rounding','rate'],
+        ids:    function(self){ return [self.config.currency_id[0], self.company.currency_id[0]]; },
         loaded: function(self, currencies){
             self.currency = currencies[0];
             if (self.currency.rounding > 0 && self.currency.rounding < 1) {
@@ -336,6 +341,7 @@ exports.PosModel = Backbone.Model.extend({
                 self.currency.decimals = 0;
             }
 
+            self.company_currency = currencies[1];
         },
     },{
         model:  'pos.category',
@@ -354,7 +360,12 @@ exports.PosModel = Backbone.Model.extend({
         domain: [['sale_ok','=',true],['available_in_pos','=',true]],
         context: function(self){ return { display_default_code: false }; },
         loaded: function(self, products){
+            var using_company_currency = self.config.currency_id[0] === self.company.currency_id[0];
+            var conversion_rate = self.currency.rate / self.company_currency.rate;
             self.db.add_products(_.map(products, function (product) {
+                if (!using_company_currency) {
+                    product.lst_price = round_pr(product.lst_price * conversion_rate, self.currency.rounding);
+                }
                 product.categ = _.findWhere(self.product_categories, {'id': product.categ_id[0]});
                 return new exports.Product({}, product);
             }));
@@ -624,12 +635,16 @@ exports.PosModel = Backbone.Model.extend({
 
     // returns the user who is currently the cashier for this point of sale
     get_cashier: function(){
+        // reset the cashier to the current user if session is new
+        if (this.db.load('pos_session_id') !== this.pos_session.id) {
+            this.set_cashier(this.user);
+        }
         return this.db.get_cashier() || this.get('cashier') || this.user;
     },
     // changes the current cashier
     set_cashier: function(user){
         this.set('cashier', user);
-        this.db.set_cashier(this.cashier);
+        this.db.set_cashier(this.get('cashier'));
     },
     //creates a new empty order and sets it as the current order
     add_new_order: function(){
@@ -940,6 +955,7 @@ exports.PosModel = Backbone.Model.extend({
                 model: 'pos.order',
                 method: 'create_from_ui',
                 args: args,
+                kwargs: {context: session.user_context},
             }, {
                 timeout: timeout,
                 shadow: !options.to_invoice
@@ -1384,7 +1400,8 @@ exports.Orderline = Backbone.Model.extend({
                 if (unit.rounding) {
                     this.quantity    = round_pr(quant, unit.rounding);
                     var decimals = this.pos.dp['Product Unit of Measure'];
-                    this.quantityStr = field_utils.format.float(round_di(this.quantity, decimals), {digits: [69, decimals]});
+                    this.quantity = round_di(this.quantity, decimals)
+                    this.quantityStr = field_utils.format.float(this.quantity, {digits: [69, decimals]});
                 } else {
                     this.quantity    = round_pr(quant, 1);
                     this.quantityStr = this.quantity.toFixed(0);
@@ -1400,6 +1417,7 @@ exports.Orderline = Backbone.Model.extend({
             this.set_unit_price(this.product.get_price(this.order.pricelist, this.get_quantity()));
             this.order.fix_tax_included_price(this);
         }
+        this.trigger('change', this);
     },
     // return the quantity of product
     get_quantity: function(){
@@ -2118,7 +2136,7 @@ exports.Order = Backbone.Model.extend({
                 company_registry: company.company_registry,
                 contact_address: company.partner_id[1],
                 vat: company.vat,
-                vat_label: company.country.vat_label,
+                vat_label: company.country && company.country.vat_label || '',
                 name: company.name,
                 phone: company.phone,
                 logo:  this.pos.company_logo_base64,

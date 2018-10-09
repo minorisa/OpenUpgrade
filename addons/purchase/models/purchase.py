@@ -92,7 +92,7 @@ class PurchaseOrder(models.Model):
     @api.depends('picking_ids', 'picking_ids.state')
     def _compute_is_shipped(self):
         for order in self:
-            if order.picking_ids and all([x.state == 'done' for x in order.picking_ids]):
+            if order.picking_ids and all([x.state in ['done', 'cancel'] for x in order.picking_ids]):
                 order.is_shipped = True
 
     READONLY_STATES = {
@@ -138,8 +138,8 @@ class PurchaseOrder(models.Model):
         ('invoiced', 'No Bill to Receive'),
         ], string='Billing Status', compute='_get_invoiced', store=True, readonly=True, copy=False, default='no')
 
-    picking_count = fields.Integer(compute='_compute_picking', string='Receptions', default=0, store=True)
-    picking_ids = fields.Many2many('stock.picking', compute='_compute_picking', string='Receptions', copy=False, store=True)
+    picking_count = fields.Integer(compute='_compute_picking', string='Receptions', default=0, store=True, compute_sudo=True)
+    picking_ids = fields.Many2many('stock.picking', compute='_compute_picking', string='Receptions', copy=False, store=True, compute_sudo=True)
 
     # There is no inverse function on purpose since the date may be different on each line
     date_planned = fields.Datetime(string='Scheduled Date', compute='_compute_date_planned', store=True, index=True)
@@ -323,14 +323,15 @@ class PurchaseOrder(models.Model):
 
     @api.multi
     def print_quotation(self):
+        self.write({'state': "sent"})
         return self.env.ref('purchase.report_purchase_quotation').report_action(self)
 
     @api.multi
     def button_approve(self, force=False):
         self.write({'state': 'purchase', 'date_approve': fields.Date.context_today(self)})
         self._create_picking()
-        if self.company_id.po_lock == 'lock':
-            self.write({'state': 'done'})
+        self.filtered(
+            lambda p: p.company_id.po_lock == 'lock').write({'state': 'done'})
         return {}
 
     @api.multi
@@ -376,6 +377,8 @@ class PurchaseOrder(models.Model):
 
             for pick in order.picking_ids.filtered(lambda r: r.state != 'cancel'):
                 pick.action_cancel()
+
+            order.order_line.write({'move_dest_ids':[(5,0,0)]})
 
         self.write({'state': 'cancel'})
 
@@ -476,7 +479,7 @@ class PurchaseOrder(models.Model):
         result['context'] = {}
         pick_ids = self.mapped('picking_ids')
         #choose the view_mode accordingly
-        if len(pick_ids) > 1:
+        if not pick_ids or len(pick_ids) > 1:
             result['domain'] = "[('id','in',%s)]" % (pick_ids.ids)
         elif len(pick_ids) == 1:
             res = self.env.ref('stock.view_picking_form', False)
@@ -633,7 +636,7 @@ class PurchaseOrderLine(models.Model):
 
     # Replace by invoiced Qty
     qty_invoiced = fields.Float(compute='_compute_qty_invoiced', string="Billed Qty", digits=dp.get_precision('Product Unit of Measure'), store=True)
-    qty_received = fields.Float(compute='_compute_qty_received', string="Received Qty", digits=dp.get_precision('Product Unit of Measure'), store=True)
+    qty_received = fields.Float(compute='_compute_qty_received', string="Received Qty", digits=dp.get_precision('Product Unit of Measure'), store=True, compute_sudo=True)
 
     partner_id = fields.Many2one('res.partner', related='order_id.partner_id', string='Partner', readonly=True, store=True)
     currency_id = fields.Many2one(related='order_id.currency_id', store=True, string='Currency', readonly=True)
@@ -903,12 +906,13 @@ class ProcurementRule(models.Model):
         if domain in cache:
             po = cache[domain]
         else:
-            po = self.env['purchase.order'].search([dom for dom in domain])
+            po = self.env['purchase.order'].sudo().search([dom for dom in domain])
             po = po[0] if po else False
             cache[domain] = po
         if not po:
             vals = self._prepare_purchase_order(product_id, product_qty, product_uom, origin, values, partner)
-            po = self.env['purchase.order'].create(vals)
+            company_id = values.get('company_id') and values['company_id'].id or self.env.user.company_id.id
+            po = self.env['purchase.order'].with_context(force_company=company_id).sudo().create(vals)
             cache[domain] = po
         elif not po.origin or origin not in po.origin.split(', '):
             if po.origin:
@@ -929,7 +933,7 @@ class ProcurementRule(models.Model):
                     break
         if not po_line:
             vals = self._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, supplier)
-            self.env['purchase.order.line'].create(vals)
+            self.env['purchase.order.line'].sudo().create(vals)
 
     def _get_purchase_schedule_date(self, values):
         """Return the datetime value to use as Schedule Date (``date_planned``) for the
@@ -1012,20 +1016,20 @@ class ProcurementRule(models.Model):
     def _prepare_purchase_order(self, product_id, product_qty, product_uom, origin, values, partner):
         schedule_date = self._get_purchase_schedule_date(values)
         purchase_date = self._get_purchase_order_date(product_id, product_qty, product_uom, values, partner, schedule_date)
-        fpos = self.env['account.fiscal.position'].with_context(company_id=values['company_id'].id).get_fiscal_position(partner.id)
+        fpos = self.env['account.fiscal.position'].with_context(force_company=values['company_id'].id).get_fiscal_position(partner.id)
 
         gpo = self.group_propagation_option
         group = (gpo == 'fixed' and self.group_id.id) or \
-                (gpo == 'propagate' and values['group_id'].id) or False
+                (gpo == 'propagate' and values.get('group_id') and values['group_id'].id) or False
 
         return {
             'partner_id': partner.id,
             'picking_type_id': self.picking_type_id.id,
             'company_id': values['company_id'].id,
-            'currency_id': partner.property_purchase_currency_id.id or self.env.user.company_id.currency_id.id,
+            'currency_id': partner.with_context(force_company=values['company_id'].id).property_purchase_currency_id.id or self.env.user.company_id.currency_id.id,
             'dest_address_id': values.get('partner_dest_id', False) and values['partner_dest_id'].id,
             'origin': origin,
-            'payment_term_id': partner.property_supplier_payment_term_id.id,
+            'payment_term_id': partner.with_context(force_company=values['company_id'].id).property_supplier_payment_term_id.id,
             'date_order': purchase_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'fiscal_position_id': fpos,
             'group_id': group
@@ -1041,7 +1045,7 @@ class ProcurementRule(models.Model):
         domain = super(ProcurementRule, self)._make_po_get_domain(values, partner)
         gpo = self.group_propagation_option
         group = (gpo == 'fixed' and self.group_id) or \
-                (gpo == 'propagate' and values['group_id']) or False
+                (gpo == 'propagate' and 'group_id' in values and values['group_id']) or False
 
         domain += (
             ('partner_id', '=', partner.id),

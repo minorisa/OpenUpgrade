@@ -108,6 +108,7 @@ def convert_issues(env):
     openupgrade.logged_query(
         env.cr, """
         INSERT INTO project_task (
+            create_date, create_uid, write_date, write_uid,
             %(issue_column)s, project_id,
             active, color, company_id, date_start, date_end,
             date_deadline, description, kanban_state, name,
@@ -116,6 +117,7 @@ def convert_issues(env):
             priority
         )
         SELECT
+            pi.create_date, pi.create_uid, pi.write_date, pi.write_uid,
             pi.id, COALESCE(pp.%(project_column)s, pp.id),
             pi.active, pi.color, pi.company_id, pi.date_open, pi.date_closed,
             pi.date_deadline, pi.description, pi.kanban_state, pi.name,
@@ -200,14 +202,10 @@ def convert_issues(env):
 
 
 def remove_mail_subtypes(env):
-    xml_ids = (list(MAIL_SUBTYPES_PROJECT_MAPPING.keys()) +
-               list(MAIL_SUBTYPES_ISSUE_MAPPING.keys()))
-    for xml_id in xml_ids:
-        try:
-            with env.cr.savepoint():
-                env.ref(xml_id).unlink()
-        except Exception:  # pragma: no cover
-            pass
+    openupgrade.delete_records_safely_by_xml_id(
+        env, (list(MAIL_SUBTYPES_PROJECT_MAPPING.keys()) +
+              list(MAIL_SUBTYPES_ISSUE_MAPPING.keys())),
+    )
 
 
 @openupgrade.migrate()

@@ -6,22 +6,22 @@
 # Bohdan Lisnenko, 2017
 # ТАрас <tratatuta@i.ua>, 2017
 # Zoriana Zaiats, 2017
+# Alina Semeniuk <alinasemeniuk1@gmail.com>, 2017
 # Martin Trigaux, 2017
 # zhanna shewchuk <zhanna_shewchuk@rambler.ru>, 2017
-# Alina Semeniuk <alinasemeniuk1@gmail.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-02-19 13:43+0000\n"
 "PO-Revision-Date: 2018-02-19 13:43+0000\n"
-"Last-Translator: Alina Semeniuk <alinasemeniuk1@gmail.com>, 2017\n"
+"Last-Translator: zhanna shewchuk <zhanna_shewchuk@rambler.ru>, 2017\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: uk\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #. module: web_editor
 #. openerp-web
@@ -275,7 +275,7 @@ msgstr "Змініть опис відомостей про медіа та пі
 #: code:addons/web_editor/static/src/xml/ace.xml:30
 #, python-format
 msgid "Close"
-msgstr "Зупинено"
+msgstr "Закрити"
 
 #. module: web_editor
 #. openerp-web
@@ -699,7 +699,7 @@ msgstr "Горизонтально"
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub_id
 msgid "ID"
-msgstr "ІД"
+msgstr "ID"
 
 #. module: web_editor
 #. openerp-web
@@ -1039,7 +1039,7 @@ msgstr "Попередній перегляд"
 #: code:addons/web_editor/static/src/xml/editor.xml:57
 #, python-format
 msgid "Previous"
-msgstr ""
+msgstr "Попередній"
 
 #. module: web_editor
 #: model:ir.ui.view,arch_db:web_editor.colorpicker
@@ -1236,7 +1236,7 @@ msgstr "Вибрати з файлів"
 #: code:addons/web_editor/static/src/js/widgets/ace.js:567
 #, python-format
 msgid "Server error"
-msgstr ""
+msgstr "Помилка сервера"
 
 #. module: web_editor
 #. openerp-web

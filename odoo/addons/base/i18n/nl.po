@@ -3077,6 +3077,14 @@ msgid ""
 "    - Assign lead to salesteams: define your own filters and sort automatically your leads by saleteam.\n"
 "    - Assign lead to salesmen: define filter by saleman and dispatch automatically your leads to the right saleman.\n"
 msgstr ""
+"\n"
+"Lead scores\n"
+"============\n"
+"Deze module staat u toe om...\n"
+"- Specifieke pagina's hun weergaven te traceren op uw website.\n"
+"- Score toewijzen aan een prospect: sorteer automatisch uw prospect en beschouw deze als belangrijker.\n"
+"- Wijs prospect toe aan verkoopteam: definieer uw eigen filters en sorteer automatisch uw prospects per verkoopteam.\n"
+"- Wijs prospect toe aan verkoper: definieer een filter per verkopen en wijs automatisch uw prospects toe aan de juiste verkoper.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_crm_project
@@ -4768,7 +4776,7 @@ msgstr ""
 "Studio - personaliseer Odoo\n"
 "=======================\n"
 "\n"
-"Deze module staat de gebruiker toe om alle website formulieren te tonen gelinkt aan een specifiek\n"
+"Deze module staat de gebruiker toe om alle website formulieren te tonen gekoppeld aan een specifiek\n"
 "model. U kan vervolgens een nieuw website formulier aanmaken of een bestaande wijzigen.\n"
 "\n"
 
@@ -5592,7 +5600,7 @@ msgstr ""
 "\n"
 "Deze snelkoppeling staat u toe om verkooporders te genereren op basis van de geselecteerde case.\n"
 "Als verschillende cases open zijn (een lijst, genereert het een verkooporder per case.\n"
-"De case wordt vervolgens gesloten en gelinkt aan het gegenereerde verkooporder.\n"
+"De case wordt vervolgens gesloten en gekoppeld aan het gegenereerde verkooporder.\n"
 "\n"
 "We raden u aan om deze module te installeren als u de modules sale en crm heeft geïnstalleerd."
 
@@ -8242,6 +8250,7 @@ msgstr "Argentinië - Boekhoudkundige rapporten"
 #: model:ir.model.fields,help:base.field_ir_act_client_params
 msgid "Arguments sent to the client along with the view tag"
 msgstr ""
+"Argumenten welke naar de cliënt worden verzonden, inclusief de 'view tag'"
 
 #. module: base
 #: model:res.country,name:base.am
@@ -18367,6 +18376,8 @@ msgid ""
 "Provide the field used to link the newly created record on the record on "
 "used by the server action."
 msgstr ""
+"Vul het veld in welke gebruikt wordt om het nieuw aangemaakte veld te linken"
+" aan het veld gebruikt door de server actie."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hw_screen
@@ -20456,6 +20467,8 @@ msgid ""
 "The Selection Options expression is not a valid Pythonic expression. Please "
 "provide an expression in the [('key','Label'), ...] format."
 msgstr ""
+"De waarde van \"Selectie-opties\" is geen geldige Python-uitdrukking. Vul "
+"een waarde in van de vorm [('sleutel', 'waarde'), ...]."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang_grouping
@@ -21459,7 +21472,7 @@ msgstr "UPS factureer mijn account"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
 msgid "UPS Shipping"
-msgstr "USPS verzending"
+msgstr "UPS verzending"
 
 #. module: base
 #: selection:ir.attachment,type:0
@@ -22668,8 +22681,8 @@ msgid ""
 "You can not change the company as the partner/user has multiple user linked "
 "with different companies."
 msgstr ""
-"U kan niet het bedrijf wijzigen omdat de partner/gebruiker meerdere "
-"gebruikers gelinkt heeft aan meerdere bedrijven."
+"U kan niet het bedrijf wijzigen omdat de relatie/gebruiker meerdere "
+"gebruikers gekoppeld heeft aan meerdere bedrijven."
 
 #. module: base
 #: sql_constraint:res.users:0
@@ -22811,6 +22824,9 @@ msgid ""
 "instead. If SSL is needed, an upgrade to Python 2.6 on the server-side "
 "should do the trick."
 msgstr ""
+"Uw Odoo Server ondersteunt geen SMTP over een SSL verbinding. U kan daarvoor"
+" in de plaats gebruik maken van STARTSSL. Indien SSL noodzakelijk is, dient "
+"u up te graden naar Python 2.6 op de server."
 
 #. module: base
 #: code:addons/base/ir/ir_mail_server.py:477

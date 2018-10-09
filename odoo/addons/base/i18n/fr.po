@@ -18,7 +18,6 @@
 # Xavier Belmere <Info@cartmeleon.com>, 2017
 # Lionel Sausin <ls@numerigraphe.com>, 2017
 # Florian Hatat, 2017
-# Lamia Ishak <lamiaishak@hotmail.co.uk>, 2017
 # Christophe Dubuit <cdubuit@yahoo.com>, 2017
 # Bertrand LATOUR <divoir@gmail.com>, 2017
 # nthnnl <nathan070@me.com>, 2017
@@ -37,6 +36,7 @@
 # Guewen Baconnier <guewen.baconnier@camptocamp.com>, 2017
 # Xavier Brochard <xavier@alternatif.org>, 2017
 # Jérémy Donas <LeDistordu@users.noreply.github.com>, 2017
+# Léonie Bouchat <lbo@odoo.com>, 2017
 # Adriana Ierfino <adriana.ierfino@savoirfairelinux.com>, 2017
 # Melanie Bernard <mbe@odoo.com>, 2017
 # Daniel & Delphine <dd2013@leschoupinous.net>, 2017
@@ -49,7 +49,6 @@
 # leemannd <denis.leemann@camptocamp.com>, 2017
 # Nancy Bolognesi <nb@microcom.ca>, 2017
 # Jeanjean Noname <monsieur.spock@gmail.com>, 2017
-# fr rev <e2ffr02@hotmail.com>, 2017
 # Alexis de Lattre <alexis@via.ecp.fr>, 2017
 # fr rev <e2ffr04@hotmail.com>, 2017
 # Sébastien LANGE (SYLEAM) <sebastien.lange@syleam.fr>, 2017
@@ -57,13 +56,14 @@
 # fr trans <e2ftrans1@yahoo.com>, 2017
 # William Henrotin <whe@odoo.com>, 2017
 # e2f <projects@e2f.com>, 2018
+# fr rev <e2ffr02@hotmail.com>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-02-19 14:33+0000\n"
 "PO-Revision-Date: 2018-02-19 14:33+0000\n"
-"Last-Translator: e2f <projects@e2f.com>, 2018\n"
+"Last-Translator: fr rev <e2ffr02@hotmail.com>, 2018\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1950,7 +1950,7 @@ msgid ""
 msgstr ""
 "\n"
 "Tiroir-caisse enregistré en Belgique\n"
-"================================\n"
+"====================================\n"
 "\n"
 "Ce module transforme le module Point de vente en tiroir-caisse certifié en Belgique.\n"
 "\n"
@@ -2828,7 +2828,7 @@ msgstr ""
 "\n"
 "Ce module vous permets d'utiliser à distance des périphériques connectés à ce serveur.\n"
 "\n"
-"Ce module contient uniquement la structure d'activation. Le pilotes de périphériques sont disponible dans d'autre modules qui doivent être installés séparément. \n"
+"Ce module contient uniquement la structure d'activation. Les pilotes de périphériques sont disponibles dans d'autres modules qui doivent être installés séparément. \n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk
@@ -5475,11 +5475,11 @@ msgstr ""
 "1) Pour un client d'une autre province et une livraison à son domicile.\n"
 "Définir la position  fiscale du client selon celle de sa province.\n"
 "\n"
-"2) Pour un client d'une autre province. Lorsque celui-ci envoie un camion à votre domicile pour prendre ses produits. Ne pas utiliser la position fiscale du clien.\n"
+"2) Pour un client d'une autre province. Lorsque celui-ci envoie un camion à votre domicile pour prendre ses produits. Ne pas utiliser la position fiscale du client.\n"
 "\n"
 "3) Un fournisseur international ne facture pas les taxes. Les taxes sont facturés à la douane par le courtier en douane. Pour ce vendeur, définir la position budgétaire à 'International'.\n"
 "\n"
-"4) Une vendeur international charge sa vente aux taxes de votre province. Ces taxes sont enregistrées avec votre position."
+"4) Un vendeur international charge sa vente aux taxes de votre province. Ces taxes sont enregistrées avec votre position."
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pl
@@ -5827,19 +5827,18 @@ msgid ""
 "       the spreading, for the selected Analytic Accounts of Budgets.\n"
 msgstr ""
 "\n"
-"Module permettant aux comptables de gérer les budgets analytiques et croisés.\n"
-"================================================== ========================\n"
+"Module permettant aux comptables de gérer les budgets analytiques et croisés\n"
+"============================================================================\n"
 "\n"
-"  Une fois que les budgets sont définis (dans Facturation / Budgets / Budgets), les gestionnaires de projet peuvent fixer le montant prévu sur chaque compte analytique.\n"
+"Une fois que les budgets sont définis (dans Facturation / Budgets / Budgets), les gestionnaires de projet peuvent fixer le montant prévu sur chaque compte analytique.\n"
 "\n"
 "Le comptable a la possibilité de voir le total des prévisions de chaque budget afin d'assurer que le total prévu n'est ni supérieur ni inférieur à ce qu'il avait planifié. Chaque budget peut être visualisé sous forme de vue graphique.\n"
 "\n"
-"  Trois rapports sont disponibles:\n"
-"  ----------------------------\n"
-"  1. Le premier est réalisé à partir d'une liste des budgets. Il donne la répartition des comptes analytiques pour ces budgets.\n"
+"Trois rapports sont disponibles:\n"
+"--------------------------------\n"
 "\n"
-"  2. Le second est un résumé du précédent, il donne la répartition par comptes analytiques budgétaires sélectionnés\n"
-"\n"
+"1. Le premier est réalisé à partir d'une liste des budgets. Il donne la répartition des comptes analytiques pour ces budgets.\n"
+"2. Le second est un résumé du précédent, il donne la répartition par comptes analytiques budgétaires sélectionnés\n"
 "3. Le dernier est réalisé à partir du plan comptable analytique. Il donne la répartition, pour les comptes analytiques budgétaires sélectionnés.\n"
 
 #. module: base
@@ -8648,7 +8647,7 @@ msgstr "Lecture et analyse de Codes barre"
 #: model:ir.ui.view,arch_db:base.view_model_fields_search
 #: model:ir.ui.view,arch_db:base.view_model_search
 msgid "Base"
-msgstr "Base de calcul"
+msgstr "Base"
 
 #. module: base
 #: selection:ir.model.fields,state:0
@@ -10044,7 +10043,7 @@ msgstr "Droit de création"
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_rule_search
 msgid "Create Access Right"
-msgstr "Créer un droit d'accès"
+msgstr "Droit d'accès pour la création"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
@@ -10789,7 +10788,7 @@ msgstr "Données de démonstration"
 #. module: base
 #: model:res.country,name:base.cd
 msgid "Democratic Republic of the Congo"
-msgstr "République démocratique du Congo "
+msgstr "République démocratique du Congo"
 
 #. module: base
 #: model:res.country,name:base.dk
@@ -11333,7 +11332,7 @@ msgstr "Passerelle de Courriels"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing
 msgid "Email Marketing"
-msgstr "Marketing par e-mail"
+msgstr "Emailing"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_users_form_simple_modif
@@ -13369,10 +13368,8 @@ msgid ""
 "If several child actions return an action, only the last one will be executed.\n"
 "                                    This may happen when having server actions executing code that returns an action, or server actions returning a client action."
 msgstr ""
-"Si plusieurs actions filles retournent une action, seul la dernière sera exécutée.\n"
-"Cela peut se produire quand on a : \n"
-" - des actions-serveur qui exécutent du code retournant une action \n"
-" - ou des actions-serveur retournant une action du client."
+"Si plusieurs actions filles renvoient une action, seule la dernière sera exécutée.\n"
+"Cela peut se produire lorsque plusieurs actions-serveur exécutent du code qui renvoie une action ; ou lorsque des actions-serveur renvoient une action-client."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_users_action_id
@@ -15139,7 +15136,7 @@ msgstr "Marketing"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_marketing_automation
 msgid "Marketing Automation"
-msgstr "Automatisation du marketing"
+msgstr "Automatisation d'emails"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ma
@@ -22608,7 +22605,7 @@ msgstr "Nombre total d'enregistrements dans ce modèle"
 #. module: base
 #: model:ir.module.module,summary:base.module_point_of_sale
 msgid "Touchscreen Interface for Shops"
-msgstr "Interface tactile pour boutiques"
+msgstr "Interface pour magasins"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_tour
@@ -23966,7 +23963,7 @@ msgstr "Grossiste"
 #: model:ir.actions.act_window,name:base.ir_action_window
 #: model:ir.ui.menu,name:base.menu_ir_action_window
 msgid "Window Actions"
-msgstr "Actions de la fenêtre"
+msgstr "Actions de l'interface"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_change_password_user_wizard_id

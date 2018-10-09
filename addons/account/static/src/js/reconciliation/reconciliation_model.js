@@ -128,6 +128,20 @@ var StatementModel = BasicModel.extend({
         var line = this.getLine(handle);
         var prop = _.clone(_.find(line.mv_lines, {'id': mv_line_id}));
         this._addProposition(line, prop);
+
+        // Check whether we have some propositions left
+        // If we don't, it means we are on an empty page
+        // so let's go back to the previous page
+        // Through the offset
+        var propLineIds = _.map(line.reconciliation_proposition, function(prop) {
+                return prop.id;
+            });
+        var leftOversProps = _.filter(line.mv_lines, function(mv_line) {
+            return propLineIds.indexOf(mv_line.id) === -1;
+        });
+        if (line.offset && !leftOversProps.length) {
+            line.offset -= line.limitMoveLines;
+        }
         return $.when(this._computeLine(line), this._performMoveLine(handle));
     },
     /**
@@ -517,7 +531,6 @@ var StatementModel = BasicModel.extend({
     },
     /**
      * Force the partial reconciliation to display the reconciliate button.
-     * This method should only  be called when there is onely one proposition.
      *
      * @param {string} handle
      * @returns {Deferred}
@@ -527,14 +540,17 @@ var StatementModel = BasicModel.extend({
 
         // Retrieve the toggle proposition
         var selected;
-        _.each(line.reconciliation_proposition, function (prop) {
+        var targetLineAmount = line.st_line.amount;
+        line.reconciliation_proposition.every(function (prop) {
             if (!prop.invalid) {
-                if (((line.balance.amount < 0 || !line.partial_reconcile) && prop.amount > 0 && line.st_line.amount > 0 && line.st_line.amount < prop.amount) ||
-                    ((line.balance.amount > 0 || !line.partial_reconcile) && prop.amount < 0 && line.st_line.amount < 0 && line.st_line.amount > prop.amount)) {
+                if (((line.balance.amount < 0 || !line.partial_reconcile) && prop.amount > 0 && targetLineAmount > 0 && targetLineAmount < prop.amount) ||
+                    ((line.balance.amount > 0 || !line.partial_reconcile) && prop.amount < 0 && targetLineAmount < 0 && targetLineAmount > prop.amount)) {
                     selected = prop;
                     return false;
                 }
+            targetLineAmount -= prop.amount;
             }
+            return true;
         });
 
         // If no toggled proposition found, reject it
@@ -644,7 +660,7 @@ var StatementModel = BasicModel.extend({
                     return !isNaN(prop.id) && prop.already_paid;
                 }), 'id'),
                 "new_aml_dicts": _.map(_.filter(props, function (prop) {
-                    return isNaN(prop.id);
+                    return isNaN(prop.id) && prop.display;
                 }), self._formatToProcessReconciliation.bind(self, line)),
             };
 
@@ -785,6 +801,7 @@ var StatementModel = BasicModel.extend({
                         model: 'account.tax',
                         method: 'json_friendly_compute_all',
                         args: args,
+                        context: $.extend(self.context || {}, {'round': true}),
                     })
                     .then(function (result) {
                         _.each(result.taxes, function(tax){
@@ -848,7 +865,7 @@ var StatementModel = BasicModel.extend({
                 }) : false,
                 account_code: self.accounts[line.st_line.open_balance_account_id],
             };
-            line.balance.type = line.balance.amount_currency ? (line.balance.amount_currency > 0 && line.st_line.partner_id ? 0 : -1) : 1;
+            line.balance.type = line.balance.amount_currency ? (line.st_line.partner_id ? 0 : -1) : 1;
         });
     },
     /**
@@ -964,6 +981,7 @@ var StatementModel = BasicModel.extend({
         var formatOptions = {
             currency_id: line.st_line.currency_id,
         };
+        var amount = values.amount !== undefined ? values.amount : line.balance.amount;
         var prop = {
             'id': _.uniqueId('createLine'),
             'label': values.label || line.st_line.name,
@@ -975,8 +993,7 @@ var StatementModel = BasicModel.extend({
             'debit': 0,
             'credit': 0,
             'base_amount': values.amount_type !== "percentage" ?
-                (values.amount || line.balance.amount) :
-                line.balance.amount * values.amount / 100,
+                (amount) : line.balance.amount * values.amount / 100,
             'percent': values.amount_type === "percentage" ? values.amount : null,
             'link': values.link,
             'display': true,
@@ -1237,7 +1254,7 @@ var ManualModel = StatementModel.extend({
                 });
             } else {
                 var mv_line_ids = _.pluck(_.filter(props, function (prop) {return !isNaN(prop.id);}), 'id');
-                var new_mv_line_dicts = _.map(_.filter(props, function (prop) {return isNaN(prop.id);}), self._formatToProcessReconciliation.bind(self, line));
+                var new_mv_line_dicts = _.map(_.filter(props, function (prop) {return isNaN(prop.id) && prop.display;}), self._formatToProcessReconciliation.bind(self, line));
                 process_reconciliations.push({
                     id: null,
                     type: null,

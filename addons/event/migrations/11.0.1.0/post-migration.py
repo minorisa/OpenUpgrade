@@ -29,14 +29,14 @@ def migrate_reply_to(env):
     """)
     event_rows = env.cr.fetchall()
     for row in event_rows:
-        event = env.cr['event.event'].browse(row[0])
+        event = env['event.event'].browse(row[0])
         partner = env['res.partner'].search([('email', '=', row[1])])
         if not partner:
             partner = env['res.partner'].create({
                 'name': row[1],
                 'email': row[1],
             })
-        event.message_follower_ids = [(4, partner[:1].id)]
+        event.message_subscribe(partner_ids=partner[:1].ids)
 
 
 @openupgrade.migrate()

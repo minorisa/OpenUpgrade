@@ -162,10 +162,7 @@ class BlogPost(models.Model):
                 blog_post.teaser = blog_post.teaser_manual
             else:
                 content = html2plaintext(blog_post.content).replace('\n', ' ')
-                blog_post.teaser = ' '.join(itertools.islice(
-                    (c for c in content.split(' ') if c),
-                    50
-                )) + '...'
+                blog_post.teaser = content[:150] + '...'
 
     @api.multi
     def _set_teaser(self):
@@ -226,7 +223,7 @@ class BlogPost(models.Model):
             return super(BlogPost, self).get_access_action(access_uid)
         return {
             'type': 'ir.actions.act_url',
-            'url': self.url,
+            'url': self.website_url,
             'target': 'self',
             'target_type': 'public',
             'res_id': self.id,

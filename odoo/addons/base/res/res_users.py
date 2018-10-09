@@ -14,6 +14,7 @@ from hashlib import sha256
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
+from odoo.http import request
 from odoo.osv import expression
 from odoo.service.db import check_super
 from odoo.tools import partition, pycompat
@@ -144,7 +145,9 @@ class Groups(models.Model):
     @api.multi
     def copy(self, default=None):
         self.ensure_one()
-        default = dict(default or {}, name=_('%s (copy)') % self.name)
+        chosen_name = default.get('name') if default else ''
+        default_name = chosen_name or _('%s (copy)') % self.name
+        default = dict(default or {}, name=default_name)
         return super(Groups, self).copy(default)
 
     @api.multi
@@ -467,8 +470,12 @@ class Users(models.Model):
                     user.sudo(user_id).check_credentials(password)
                     user.sudo(user_id)._update_last_login()
         except AccessDenied:
-            _logger.info("Login failed for db:%s login:%s", db, login)
             user_id = False
+
+        status = "successful" if user_id else "failed"
+        ip = request.httprequest.environ['REMOTE_ADDR'] if request else 'n/a'
+        _logger.info("Login %s for db:%s login:%s from %s", status, db, login, ip)
+
         return user_id
 
     @classmethod
@@ -689,7 +696,7 @@ class UsersImplied(models.Model):
             for user in self.with_context({}):
                 gs = set(concat(g.trans_implied_ids for g in user.groups_id))
                 vals = {'groups_id': [(4, g.id) for g in gs]}
-                super(UsersImplied, self).write(vals)
+                super(UsersImplied, user).write(vals)
         return res
 
 #
@@ -785,6 +792,11 @@ class GroupsView(models.Model):
             xml = E.field(E.group(*(xml1), col="2"), E.group(*(xml2), col="4"), name="groups_id", position="replace")
             xml.addprevious(etree.Comment("GENERATED AUTOMATICALLY BY GROUPS"))
             xml_content = etree.tostring(xml, pretty_print=True, encoding="unicode")
+            if not view.check_access_rights('write',  raise_exception=False):
+                # erp manager has the rights to update groups/users but not
+                # to modify ir.ui.view
+                if self.env.user.has_group('base.group_erp_manager'):
+                    view = view.sudo()
 
             new_context = dict(view._context)
             new_context.pop('install_mode_data', None)  # don't set arch_fs for this computed view
