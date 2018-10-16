@@ -6,13 +6,13 @@ from openupgradelib import openupgrade
 
 
 def map_payment_type(cr):
-    openupgrade.map_values(
-        cr,
-        'payment_order_type', 'payment_type', [
-            ('payment', 'outbound'),
-            ('debit', 'inbound'),
-        ],
-        table='account_payment_order', write='sql')
+    # openupgrade.map_values(
+    #     cr,
+    #     'payment_order_type', 'payment_type', [
+    #         ('payment', 'outbound'),
+    #         ('debit', 'inbound'),
+    #     ],
+    #     table='account_payment_order', write='sql')
 
     openupgrade.map_values(
         cr,
