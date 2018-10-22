@@ -222,11 +222,11 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
             ALTER TABLE public.account_analytic_tag
             ADD COLUMN legacy_aux_id INTEGER;
             INSERT INTO public.account_analytic_tag (
-                SELECT id + %(new_id), name, 2, true, create_uid, create_date, write_uid, write_date, id
+                SELECT id + %(new_id)s, name, 2, true, create_uid, create_date, write_uid, write_date, id
                 FROM public.account_tipus_auxiliar
                 )
         """ % {
-            'new_id': max_id,
+            'new_id': max_id
         }
     )
 
