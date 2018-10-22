@@ -95,7 +95,7 @@ CREATE INDEX account_analytic_tag_name_index
         cr,
         """
 INSERT INTO public.account_analytic_tag (
-    SELECT id, name, 10, true, create_uid, create_date, write_uid, write_date
+    SELECT id, name, 1, true, create_uid, create_date, write_uid, write_date
     FROM public.account_unitat_negoci
     )
         """
@@ -204,5 +204,54 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     FROM account_invoice_line
     WHERE unitat_negoci_id IS NOT null
 )        
+        """
+    )
+
+    # =============================
+    # Account Tipus Auxiliar
+
+    # Get max id in account_analytic_tag
+    cr.execute("SELECT MAX(id) FROM public.account_analytic_tag")
+    max_id = cr.fetchone()[0] or 1000
+    max_id += 1
+
+    # Create legacy field in account_analytic_tag and insert values
+    # from account_tipus_auxiliar
+    openupgrade.logged_query(
+        cr, """
+            ALTER TABLE public.account_analytic_tag
+            ADD COLUMN legacy_aux_id INTEGER;
+            INSERT INTO public.account_analytic_tag (
+                SELECT id + %(new_id), name, 2, true, create_uid, create_date, write_uid, write_date, id
+                FROM public.account_tipus_auxiliar
+                )
+        """ % {
+            'new_id': max_id,
+        }
+    )
+
+    # Update tag_ids in account_invoice_line
+    openupgrade.logged_query(
+        cr,
+        """
+INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
+    SELECT ail.id, aat.id 
+    FROM account_invoice_line ail 
+    LEFT JOIN account_analytic_tag aat ON ail.tipus_auxiliar_id = aat.legacy_aux_id
+    WHERE ail.tipus_auxiliar_id IS NOT null
+    )        
+        """
+    )
+
+    # Update tag_ids in account_move_line
+    openupgrade.logged_query(
+        cr,
+        """
+INSERT INTO public.account_analytic_tag_account_move_line_rel (
+    SELECT aml.id, aat.id 
+    FROM account_move_line aml 
+    LEFT JOIN account_analytic_tag aat ON aml.tipus_auxiliar_id = aat.legacy_aux_id
+    WHERE aml.tipus_auxiliar_id IS NOT null
+    )        
         """
     )
