@@ -129,3 +129,17 @@ def migrate(cr, version):
     #     WHERE account_move_line.cartera_id = account_cartera.id
     #     """
     # )
+
+    # Migrate conciliacio_banc
+    openupgrade.logged_query(
+        cr, """
+        ALTER TABLE account_move_line
+        ADD COLUMN account_checking BOOLEAN;
+        """
+    )
+    openupgrade.logged_query(
+        cr, """
+        UPDATE account_move_line
+        SET account_checking = conciliacio_banc;
+        """
+    )
