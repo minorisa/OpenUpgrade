@@ -68,5 +68,5 @@ def set_analytic_account_visibility(cr):
 @openupgrade.migrate()
 def migrate(cr, version):
     set_partner_id(cr)
-    create_tags(cr)
+    # create_tags(cr)
     set_analytic_account_visibility(cr)
