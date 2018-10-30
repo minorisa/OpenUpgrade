@@ -91,7 +91,7 @@ def migrate(env, version):
     env.cr.execute(
         """
         SELECT res_id FROM ir_model_data
-        WHERE name LIKE 'action_procurement_compute
+        WHERE name LIKE 'action_procurement_compute'
         """
     )
     xid = env.cr.fetchone()
