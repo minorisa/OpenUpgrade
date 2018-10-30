@@ -29,6 +29,8 @@ def migrate(cr, version):
     # Create table account_analytic_dimension
     openupgrade.logged_query(
         cr, """
+CREATE SEQUENCE public.account_analytic_dimension_id_seq;
+        
 CREATE TABLE public.account_analytic_dimension
 (
     id integer NOT NULL DEFAULT nextval('account_analytic_dimension_id_seq'::regclass),
