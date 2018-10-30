@@ -56,8 +56,6 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.account_analytic_dimension
-    OWNER to openerp;
 COMMENT ON TABLE public.account_analytic_dimension
     IS 'account.analytic.dimension';
 
