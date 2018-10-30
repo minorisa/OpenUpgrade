@@ -85,6 +85,8 @@ COMMENT ON COLUMN public.account_analytic_dimension.color
     openupgrade.logged_query(
         cr,
         """
+CREATE SEQUENCE public.account_analytic_tag_id_seq;
+
 CREATE TABLE public.account_analytic_tag
 (
     id integer NOT NULL DEFAULT nextval('account_analytic_tag_id_seq'::regclass),
@@ -116,8 +118,6 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.account_analytic_tag
-    OWNER to openerp;
 COMMENT ON TABLE public.account_analytic_tag
     IS 'Analytic Tags';
 
