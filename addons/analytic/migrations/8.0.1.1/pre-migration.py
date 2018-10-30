@@ -318,7 +318,7 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
 INSERT INTO public.account_analytic_tag (
     SELECT id + %(new_id), name, 2, true, 1, current_date, 1, 
         current_date, id, %(dim_id)s
-    FROM public.account_unitat_negoci
+    FROM public.account_unitat_negoci);
                 """ % {
                     'new_id': max_id,
                     'dim_id': xid,
