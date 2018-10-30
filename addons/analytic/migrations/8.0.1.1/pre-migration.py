@@ -316,7 +316,7 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
             cr.execute(
                 """
 INSERT INTO public.account_analytic_tag  VALUES (
-    %(new_id)s, %(xname)s, 2, true, 1, current_date, 1, 
+    %(new_id)s, '%(xname)s', 2, true, 1, current_date, 1, 
         current_date, id, %(dim_id)s
     );
                 """ % {
