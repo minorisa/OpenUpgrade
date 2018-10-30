@@ -85,3 +85,34 @@ def migrate(env, version):
         UPDATE ir_cron SET interval_type = 'days'
         WHERE interval_type = 'work_days'""")
     fill_cron_action_server_pre(env)
+
+    # Minorisa
+    # Remove conflicting views & modules
+    env.cr.execute(
+        """
+        SELECT res_id FROM ir_model_data
+        WHERE name LIKE 'action_procurement_compute
+        """
+    )
+    xid = env.cr.fetchone()
+    xid = xid and xid[0] or False
+    if xid:
+        env.cr.execute(
+            """
+            DELETE FROM ir_act_window
+            WHERE id = %s
+            """, (xid,)
+        )
+    env.cr.execute(
+        """
+        DELETE FROM ir_act_window
+        WHERE res_model = 'procurement_order'
+        """
+    )
+    env.cr.execute(
+        """
+        UPDATE ir_module_module
+        SET state = 'uninstalled'
+        WHERE name = 'point_of_sale'
+        """
+    )
