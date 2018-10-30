@@ -315,13 +315,14 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
         for tag in cr.dictfetchall():
             cr.execute(
                 """
-INSERT INTO public.account_analytic_tag (
-    SELECT id + %(new_id)s, name, 2, true, 1, current_date, 1, 
+INSERT INTO public.account_analytic_tag  VALUES (
+    id + %(new_id)s, %(xname)s, 2, true, 1, current_date, 1, 
         current_date, id, %(dim_id)s
-    FROM public.account_unitat_negoci);
+    );
                 """ % {
                     'new_id': max_id,
                     'dim_id': xid,
+                    'xname': tag['name'],
                 }
             )
         xid += 1
