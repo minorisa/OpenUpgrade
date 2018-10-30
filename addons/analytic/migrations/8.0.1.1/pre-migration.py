@@ -162,7 +162,7 @@ CREATE INDEX account_analytic_tag_name_index
     """)
 
     # Get new ID
-    dim1_id = cr.fetchone()[0] or 1
+    dim1_id = 1
 
     # Insertar BUs a account_analytic tag
     openupgrade.logged_query(
@@ -300,7 +300,6 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
             (%s + 1, %s, %s, 1, current_date, 1, current_date, 1)
             """, (xid, aux['name'], aux['name'].lower())
             )
-        dim_id = cr.fetchone()[0]
 
         cr.execute(
             """
