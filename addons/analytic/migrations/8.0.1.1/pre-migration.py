@@ -158,7 +158,7 @@ CREATE INDEX account_analytic_tag_name_index
     # Insert new dimension CC for business_units
     cr.execute("""
     INSERT INTO account_analytic_dimension
-    VALUES ('CENTRE COST', 'cc', 1, current_date, 1, current_date, 1)
+    VALUES (1, 'CENTRE COST', 'cc', 1, current_date, 1, current_date, 1)
     """)
 
     # Get new ID
@@ -293,11 +293,12 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     cr.execute("SELECT * FROM account_tipus_auxiliar")
     tipus_auxs = cr.dictfetchall()
     for aux in tipus_auxs:
+        xid = aux['id'] + 1
         cr.execute(
             """
             INSERT INTO account_analytic_dimension VALUES
-            (%s, %s, 1, current_date, 1, current_date, 1)
-            """, (aux['name'], aux['name'].lower())
+            (%s + 1, %s, %s, 1, current_date, 1, current_date, 1)
+            """, (xid, aux['name'], aux['name'].lower())
             )
         dim_id = cr.fetchone()[0]
 
@@ -317,7 +318,7 @@ INSERT INTO public.account_analytic_tag (
     FROM public.account_unitat_negoci
                 """ % {
                     'new_id': max_id,
-                    'dim_id': dim_id,
+                    'dim_id': xid,
                 }
             )
 
