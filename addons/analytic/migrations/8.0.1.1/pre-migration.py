@@ -311,20 +311,21 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
             WHERE tipus_auxiliar_id = %s
             """, (aux['id'],)
         )
-
+        xtagid = max_id + 1
         for tag in cr.dictfetchall():
             cr.execute(
                 """
 INSERT INTO public.account_analytic_tag  VALUES (
-    id + %(new_id)s, %(xname)s, 2, true, 1, current_date, 1, 
+    %(new_id)s, %(xname)s, 2, true, 1, current_date, 1, 
         current_date, id, %(dim_id)s
     );
                 """ % {
-                    'new_id': max_id,
+                    'new_id': xtagid,
                     'dim_id': xid,
                     'xname': tag['name'],
                 }
             )
+            xtagid += 1
         xid += 1
 
     # Update tag_ids in account_invoice_line
