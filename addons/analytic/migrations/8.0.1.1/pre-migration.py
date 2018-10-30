@@ -301,7 +301,7 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
         cr.execute(
             """
             INSERT INTO account_analytic_dimension VALUES
-            (%s + 1, %s, %s, 1, current_date, 1, current_date, 1)
+            (%s, %s, %s, 1, current_date, 1, current_date, 1)
             """, (xid, aux['name'], aux['name'].lower())
             )
 
