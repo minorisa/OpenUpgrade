@@ -293,7 +293,7 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     cr.execute("SELECT * FROM account_tipus_auxiliar")
     tipus_auxs = cr.dictfetchall()
     for aux in tipus_auxs:
-        xid = aux['id'] + 1
+        xid = int(aux['id']) + 1
         cr.execute(
             """
             INSERT INTO account_analytic_dimension VALUES
