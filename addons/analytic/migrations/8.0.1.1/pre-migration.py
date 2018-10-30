@@ -16,7 +16,10 @@
 #
 ##############################################################################
 
+import logging
 from openupgradelib import openupgrade
+
+_logger = logging.getLogger(__name__)
 
 
 @openupgrade.migrate()
@@ -293,6 +296,7 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     cr.execute("SELECT * FROM account_tipus_auxiliar")
     tipus_auxs = cr.dictfetchall()
     for aux in tipus_auxs:
+        _logger.info(aux)
         xid = int(aux['id']) + 1
         cr.execute(
             """
