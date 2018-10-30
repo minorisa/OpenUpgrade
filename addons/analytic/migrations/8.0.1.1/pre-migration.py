@@ -295,9 +295,9 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     # Get tipus auxiliars -> dimensions
     cr.execute("SELECT * FROM account_tipus_auxiliar")
     tipus_auxs = cr.dictfetchall()
+    xid = 2
     for aux in tipus_auxs:
         _logger.info(aux)
-        xid = int(aux['id']) + 1
         cr.execute(
             """
             INSERT INTO account_analytic_dimension VALUES
@@ -324,6 +324,7 @@ INSERT INTO public.account_analytic_tag (
                     'dim_id': xid,
                 }
             )
+        xid += 1
 
     # Update tag_ids in account_invoice_line
     openupgrade.logged_query(
