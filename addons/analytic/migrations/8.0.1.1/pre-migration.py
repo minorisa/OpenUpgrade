@@ -25,14 +25,68 @@ def migrate(cr, version):
     cr.execute('drop view if exists analytic_entries_report cascade')
 
     # Minorisa
-    # Create table analytic_account_tag for 11.0
+
+    # Create table account_analytic_dimension
+    openupgrade.logged_query(
+        cr, """
+CREATE TABLE public.account_analytic_dimension
+(
+    id integer NOT NULL DEFAULT nextval('account_analytic_dimension_id_seq'::regclass),
+    name character varying COLLATE pg_catalog."default" NOT NULL,
+    code character varying COLLATE pg_catalog."default" NOT NULL,
+    create_uid integer,
+    create_date timestamp without time zone,
+    write_uid integer,
+    write_date timestamp without time zone,
+    color integer,
+    CONSTRAINT account_analytic_dimension_pkey PRIMARY KEY (id),
+    CONSTRAINT account_analytic_dimension_create_uid_fkey FOREIGN KEY (create_uid)
+        REFERENCES public.res_users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE SET NULL,
+    CONSTRAINT account_analytic_dimension_write_uid_fkey FOREIGN KEY (write_uid)
+        REFERENCES public.res_users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE SET NULL
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.account_analytic_dimension
+    OWNER to openerp;
+COMMENT ON TABLE public.account_analytic_dimension
+    IS 'account.analytic.dimension';
+
+COMMENT ON COLUMN public.account_analytic_dimension.name
+    IS 'Name';
+
+COMMENT ON COLUMN public.account_analytic_dimension.code
+    IS 'Code';
+
+COMMENT ON COLUMN public.account_analytic_dimension.create_uid
+    IS 'Created by';
+
+COMMENT ON COLUMN public.account_analytic_dimension.create_date
+    IS 'Created on';
+
+COMMENT ON COLUMN public.account_analytic_dimension.write_uid
+    IS 'Last Updated by';
+
+COMMENT ON COLUMN public.account_analytic_dimension.write_date
+    IS 'Last Updated on';
+
+COMMENT ON COLUMN public.account_analytic_dimension.color
+    IS 'Color';        """
+    )
+
+    # Create table account_analytic_tag for 11.0
     openupgrade.logged_query(
         cr,
         """
-CREATE SEQUENCE public.account_analytic_tag_id_seq;
-
-CREATE TABLE IF NOT EXISTS public.account_analytic_tag
-    (
+CREATE TABLE public.account_analytic_tag
+(
     id integer NOT NULL DEFAULT nextval('account_analytic_tag_id_seq'::regclass),
     name character varying COLLATE pg_catalog."default" NOT NULL,
     color integer,
@@ -41,7 +95,13 @@ CREATE TABLE IF NOT EXISTS public.account_analytic_tag
     create_date timestamp without time zone,
     write_uid integer,
     write_date timestamp without time zone,
+    legacy_aux_id integer,
+    analytic_dimension_id integer,
     CONSTRAINT account_analytic_tag_pkey PRIMARY KEY (id),
+    CONSTRAINT account_analytic_tag_analytic_dimension_id_fkey FOREIGN KEY (analytic_dimension_id)
+        REFERENCES public.account_analytic_dimension (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE SET NULL,
     CONSTRAINT account_analytic_tag_create_uid_fkey FOREIGN KEY (create_uid)
         REFERENCES public.res_users (id) MATCH SIMPLE
         ON UPDATE NO ACTION
@@ -56,6 +116,8 @@ WITH (
 )
 TABLESPACE pg_default;
 
+ALTER TABLE public.account_analytic_tag
+    OWNER to openerp;
 COMMENT ON TABLE public.account_analytic_tag
     IS 'Analytic Tags';
 
@@ -80,6 +142,9 @@ COMMENT ON COLUMN public.account_analytic_tag.write_uid
 COMMENT ON COLUMN public.account_analytic_tag.write_date
     IS 'Last Updated on';
 
+COMMENT ON COLUMN public.account_analytic_tag.analytic_dimension_id
+    IS 'Dimension';
+
 -- Index: account_analytic_tag_name_index
 
 -- DROP INDEX public.account_analytic_tag_name_index;
@@ -87,18 +152,27 @@ COMMENT ON COLUMN public.account_analytic_tag.write_date
 CREATE INDEX account_analytic_tag_name_index
     ON public.account_analytic_tag USING btree
     (name COLLATE pg_catalog."default")
-    TABLESPACE pg_default;
-        """
+    TABLESPACE pg_default;        """
     )
-    # Insertar valors a account_analytic tag
+
+    # Insert new dimension CC for business_units
+    cr.execute("""
+    INSERT INTO account_analytic_dimension
+    VALUES ('CENTRE COST', 'cc', 1, current_date, 1, current_date, 1)
+    """)
+
+    # Get new ID
+    dim1_id = cr.fetchone()[0] or 1
+
+    # Insertar BUs a account_analytic tag
     openupgrade.logged_query(
         cr,
         """
 INSERT INTO public.account_analytic_tag (
-    SELECT id, name, 1, true, create_uid, create_date, write_uid, write_date
+    SELECT id, name, 1, true, 1, current_date, 1, current_date, id, %s
     FROM public.account_unitat_negoci
     )
-        """
+        """, (dim1_id,)
     )
     # Update sequence
     openupgrade.logged_query(
@@ -215,20 +289,37 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     max_id = cr.fetchone()[0] or 1000
     max_id += 1
 
-    # Create legacy field in account_analytic_tag and insert values
-    # from account_tipus_auxiliar
-    openupgrade.logged_query(
-        cr, """
-            ALTER TABLE public.account_analytic_tag
-            ADD COLUMN legacy_aux_id INTEGER;
-            INSERT INTO public.account_analytic_tag (
-                SELECT id + %(new_id)s, name, 2, true, create_uid, create_date, write_uid, write_date, id
-                FROM public.account_tipus_auxiliar
-                )
-        """ % {
-            'new_id': max_id
-        }
-    )
+    # Get tipus auxiliars -> dimensions
+    cr.execute("SELECT * FROM account_tipus_auxiliar")
+    tipus_auxs = cr.dictfetchall()
+    for aux in tipus_auxs:
+        cr.execute(
+            """
+            INSERT INTO account_analytic_dimension VALUES
+            (%s, %s, 1, current_date, 1, current_date, 1)
+            """, (aux['name'], aux['name'].lower())
+            )
+        dim_id = cr.fetchone()[0]
+
+        cr.execute(
+            """
+            SELECT * FROM account_numero_auxiliar
+            WHERE tipus_auxiliar_id = %s
+            """, (aux['id'],)
+        )
+
+        for tag in cr.dictfetchall():
+            cr.execute(
+                """
+INSERT INTO public.account_analytic_tag (
+    SELECT id + %(new_id), name, 2, true, 1, current_date, 1, 
+        current_date, id, %(dim_id)s
+    FROM public.account_unitat_negoci
+                """ % {
+                    'new_id': max_id,
+                    'dim_id': dim_id,
+                }
+            )
 
     # Update tag_ids in account_invoice_line
     openupgrade.logged_query(
