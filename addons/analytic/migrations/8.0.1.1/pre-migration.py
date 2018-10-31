@@ -317,12 +317,13 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
                 """
 INSERT INTO public.account_analytic_tag  VALUES (
     %(new_id)s, '%(xname)s', 2, true, 1, current_date, 1, 
-        current_date, id, %(dim_id)s
+        current_date, %(auxid)s, %(dim_id)s
     );
                 """ % {
                     'new_id': xtagid,
                     'dim_id': xid,
                     'xname': tag['name'],
+                    'auxid': tag['id'],
                 }
             )
             xtagid += 1
