@@ -295,14 +295,15 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     # Get tipus auxiliars -> dimensions
     cr.execute("SELECT * FROM account_tipus_auxiliar")
     tipus_auxs = cr.dictfetchall()
-    xid = 2
+    xdim2 = 2
+    xtagid = max_id
     for aux in tipus_auxs:
         _logger.info(aux)
         cr.execute(
             """
             INSERT INTO account_analytic_dimension VALUES
             (%s, %s, %s, 1, current_date, 1, current_date, 1)
-            """, (xid, aux['name'], aux['name'].lower())
+            """, (xdim2, aux['name'], aux['name'].lower())
             )
 
         cr.execute(
@@ -311,7 +312,6 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
             WHERE tipus_auxiliar_id = %s
             """, (aux['id'],)
         )
-        xtagid = max_id + 100
         for tag in cr.dictfetchall():
             cr.execute(
                 """
@@ -321,13 +321,13 @@ INSERT INTO public.account_analytic_tag  VALUES (
     );
                 """ % {
                     'new_id': xtagid,
-                    'dim_id': xid,
+                    'dim_id': xdim2,
                     'xname': tag['name'],
                     'auxid': tag['id'],
                 }
             )
             xtagid += 1
-        xid += 1
+        xdim2 += 1
 
     # Update tag_ids in account_invoice_line
     openupgrade.logged_query(
