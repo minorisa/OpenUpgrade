@@ -311,7 +311,7 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
             WHERE tipus_auxiliar_id = %s
             """, (aux['id'],)
         )
-        xtagid = max_id + 1
+        xtagid = max_id + 100
         for tag in cr.dictfetchall():
             cr.execute(
                 """
