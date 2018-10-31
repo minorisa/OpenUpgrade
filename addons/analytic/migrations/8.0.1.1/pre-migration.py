@@ -354,3 +354,74 @@ INSERT INTO public.account_analytic_tag_account_move_line_rel (
     )        
         """
     )
+
+    # Migrate periodical_invoicing
+
+    openupgrade.rename_tables(cr, [
+        ('account_periodical_invoicing_agreement',
+         'account_pro_agreement'),
+        ('account_periodical_invoicing_agreement_line',
+         'account_pro_agreement_line'),
+        ('account_periodical_invoicing_agreement_invoice',
+         'account_pro_agreement_invoice'),
+    ])
+    openupgrade.logged_query(cr,"""
+    ALTER TABLE account_pro_agreement ADD COLUMN currency_id INTEGER;
+    UPDATE account_pro_agreement SET currency_id = 1;
+    """)
+    openupgrade.drop_columns(cr, [
+        ('account_pro_agreement', 'unitat_negoci_id'),
+        ('account_pro_agreement', 'billing_day'),
+        ('account_pro_agreement_line', 'year'),
+    ])
+    openupgrade.rename_columns(cr, {
+        'account_pro_agreement_line': [
+            ('account_analytic_id', 'analytic_id'),
+            ('preu_compra', 'purchase_price'),
+        ]
+    })
+
+    # Create m2m relation between agreement line and analytic tag
+    openupgrade.logged_query(cr, """
+CREATE TABLE public.account_analytic_tag_account_pro_agreement_line_rel
+(
+    account_pro_agreement_line_id integer NOT NULL,
+    account_analytic_tag_id integer NOT NULL,
+    CONSTRAINT account_analytic_tag_account__account_pro_agreement_line_id_key UNIQUE (account_pro_agreement_line_id, account_analytic_tag_id)
+,
+    CONSTRAINT account_analytic_tag_account__account_pro_agreement_line_i_fkey FOREIGN KEY (account_pro_agreement_line_id)
+        REFERENCES public.account_pro_agreement_line (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE,
+    CONSTRAINT account_analytic_tag_account_pro_a_account_analytic_tag_id_fkey FOREIGN KEY (account_analytic_tag_id)
+        REFERENCES public.account_analytic_tag (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+COMMENT ON TABLE public.account_analytic_tag_account_pro_agreement_line_rel
+    IS 'RELATION BETWEEN account_pro_agreement_line AND account_analytic_tag';
+
+CREATE INDEX account_analytic_tag_account__account_pro_agreement_line_id_idx
+    ON public.account_analytic_tag_account_pro_agreement_line_rel USING btree
+    (account_pro_agreement_line_id)
+    TABLESPACE pg_default;
+
+CREATE INDEX account_analytic_tag_account_pro_ag_account_analytic_tag_id_idx
+    ON public.account_analytic_tag_account_pro_agreement_line_rel USING btree
+    (account_analytic_tag_id)
+    TABLESPACE pg_default;    
+    """)
+
+    # Insert BU tags in m2m
+    openupgrade.logged_query(cr, """
+INSERT INTO public.account_analytic_tag_account_pro_agreement_line_rel (
+    SELECT id, unitat_negoci_id
+    FROM account_pro_agreement_line
+    WHERE unitat_negoci_id IS NOT null
+    )    
+    """)
