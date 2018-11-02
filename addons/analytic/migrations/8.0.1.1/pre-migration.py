@@ -28,62 +28,6 @@ def migrate(cr, version):
     cr.execute('drop view if exists analytic_entries_report cascade')
 
     # Minorisa
-
-    # Create table account_analytic_dimension
-    openupgrade.logged_query(
-        cr, """
-CREATE SEQUENCE public.account_analytic_dimension_id_seq;
-        
-CREATE TABLE public.account_analytic_dimension
-(
-    id integer NOT NULL DEFAULT nextval('account_analytic_dimension_id_seq'::regclass),
-    name character varying COLLATE pg_catalog."default" NOT NULL,
-    code character varying COLLATE pg_catalog."default" NOT NULL,
-    create_uid integer,
-    create_date timestamp without time zone,
-    write_uid integer,
-    write_date timestamp without time zone,
-    color integer,
-    CONSTRAINT account_analytic_dimension_pkey PRIMARY KEY (id),
-    CONSTRAINT account_analytic_dimension_create_uid_fkey FOREIGN KEY (create_uid)
-        REFERENCES public.res_users (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE SET NULL,
-    CONSTRAINT account_analytic_dimension_write_uid_fkey FOREIGN KEY (write_uid)
-        REFERENCES public.res_users (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE SET NULL
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
-
-COMMENT ON TABLE public.account_analytic_dimension
-    IS 'account.analytic.dimension';
-
-COMMENT ON COLUMN public.account_analytic_dimension.name
-    IS 'Name';
-
-COMMENT ON COLUMN public.account_analytic_dimension.code
-    IS 'Code';
-
-COMMENT ON COLUMN public.account_analytic_dimension.create_uid
-    IS 'Created by';
-
-COMMENT ON COLUMN public.account_analytic_dimension.create_date
-    IS 'Created on';
-
-COMMENT ON COLUMN public.account_analytic_dimension.write_uid
-    IS 'Last Updated by';
-
-COMMENT ON COLUMN public.account_analytic_dimension.write_date
-    IS 'Last Updated on';
-
-COMMENT ON COLUMN public.account_analytic_dimension.color
-    IS 'Color';        """
-    )
-
     # Create table account_analytic_tag for 11.0
     openupgrade.logged_query(
         cr,
@@ -158,24 +102,15 @@ CREATE INDEX account_analytic_tag_name_index
     TABLESPACE pg_default;        """
     )
 
-    # Insert new dimension CC for business_units
-    cr.execute("""
-    INSERT INTO account_analytic_dimension
-    VALUES (1, 'CENTRE COST', 'cc', 1, current_date, 1, current_date, 1)
-    """)
-
-    # Get new ID
-    dim1_id = 1
-
     # Insertar BUs a account_analytic tag
     openupgrade.logged_query(
         cr,
         """
 INSERT INTO public.account_analytic_tag (
-    SELECT id, name, 1, true, 1, current_date, 1, current_date, id, %s
+    SELECT id, name, 1, true, 1, current_date, 1, current_date, id
     FROM public.account_unitat_negoci
     )
-        """, (dim1_id,)
+        """
     )
     # Update sequence
     openupgrade.logged_query(
@@ -293,41 +228,24 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     max_id += 1
 
     # Get tipus auxiliars -> dimensions
-    cr.execute("SELECT * FROM account_tipus_auxiliar")
-    tipus_auxs = cr.dictfetchall()
-    xdim2 = 2
+    cr.execute("SELECT * FROM account_numero_auxiliar")
+    numero_auxs = cr.dictfetchall()
     xtagid = max_id
-    for aux in tipus_auxs:
+    for aux in numero_auxs:
         _logger.info(aux)
         cr.execute(
-            """
-            INSERT INTO account_analytic_dimension VALUES
-            (%s, %s, %s, 1, current_date, 1, current_date, %s)
-            """, (xdim2, aux['name'], aux['name'].lower(), xdim2)
-            )
-
-        cr.execute(
-            """
-            SELECT * FROM account_numero_auxiliar
-            WHERE tipus_auxiliar_id = %s
-            """, (aux['id'],)
-        )
-        for tag in cr.dictfetchall():
-            cr.execute(
                 """
 INSERT INTO public.account_analytic_tag  VALUES (
     %(new_id)s, '%(xname)s', 2, true, 1, current_date, 1, 
-        current_date, %(auxid)s, %(dim_id)s
+        current_date, %(auxid)s
     );
                 """ % {
                     'new_id': xtagid,
-                    'dim_id': xdim2,
-                    'xname': tag['name'],
-                    'auxid': tag['id'],
+                    'xname': aux['name'],
+                    'auxid': aux['id'],
                 }
             )
-            xtagid += 1
-        xdim2 += 1
+        xtagid += 1
 
     # Update tag_ids in account_invoice_line
     openupgrade.logged_query(
@@ -336,8 +254,8 @@ INSERT INTO public.account_analytic_tag  VALUES (
 INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
     SELECT ail.id, aat.id 
     FROM account_invoice_line ail 
-    LEFT JOIN account_analytic_tag aat ON ail.tipus_auxiliar_id = aat.legacy_aux_id
-    WHERE ail.tipus_auxiliar_id IS NOT null
+    LEFT JOIN account_analytic_tag aat ON ail.numero_auxiliar_id = aat.legacy_aux_id
+    WHERE ail.numero_auxiliar_id IS NOT null
     )        
         """
     )
@@ -349,8 +267,8 @@ INSERT INTO public.account_analytic_tag_account_invoice_line_rel (
 INSERT INTO public.account_analytic_tag_account_move_line_rel (
     SELECT aml.id, aat.id 
     FROM account_move_line aml 
-    LEFT JOIN account_analytic_tag aat ON aml.tipus_auxiliar_id = aat.legacy_aux_id
-    WHERE aml.tipus_auxiliar_id IS NOT null
+    LEFT JOIN account_analytic_tag aat ON aml.numero_auxiliar_id = aat.legacy_aux_id
+    WHERE aml.numero_auxiliar_id IS NOT null
     )        
         """
     )
