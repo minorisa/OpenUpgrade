@@ -113,6 +113,10 @@ def switch_noupdate_flag(cr):
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     cr = env.cr
+    openupgrade.logged_query(
+        cr, """
+        DELETE FROM ir_module_module WHERE name = 'disable_openerp_online'""",
+    )
     module_renames = dict(apriori.renamed_modules)
     if not has_recurring_contracts(cr):
         # Don't install contract module without any recurring invoicing
