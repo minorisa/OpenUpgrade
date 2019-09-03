@@ -116,7 +116,7 @@ def migrate(env, version):
     openupgrade.logged_query(
         cr, """
         DELETE FROM ir_module_module WHERE name = 'disable_openerp_online';
-        DELETE FROM ir_module_data WHERE name = 'module_disable_odoo_online';""",
+        DELETE FROM ir_model_data WHERE name = 'module_disable_odoo_online';""",
     )
     module_renames = dict(apriori.renamed_modules)
     if not has_recurring_contracts(cr):
