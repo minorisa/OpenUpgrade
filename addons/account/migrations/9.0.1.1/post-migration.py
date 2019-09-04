@@ -283,11 +283,11 @@ def move_view_accounts(env):
         ALTER TABLE account_account
         DROP CONSTRAINT account_account_parent_id_fkey"""
     )
-    openupgrade.logged_query(
-        env.cr, """
-        DELETE FROM account_account
-        WHERE %s = 'view'""", (AsIs(openupgrade.get_legacy_name('type')),)
-    )
+    # openupgrade.logged_query(
+    #     env.cr, """
+    #     DELETE FROM account_account
+    #     WHERE %s = 'view'""", (AsIs(openupgrade.get_legacy_name('type')),)
+    # )
     # Remove constraint also on templates
     openupgrade.logged_query(
         env.cr, """
