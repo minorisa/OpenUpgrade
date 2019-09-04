@@ -419,3 +419,11 @@ def migrate(env, version):
     # if not multi_currency:
     #     fast_create(env, MONO_CURRENCY_FAST_CREATIONS)
     fast_create(env, MONO_CURRENCY_FAST_CREATIONS)
+
+    openupgrade.logged_query(
+        cr, """
+        UPDATE account_move
+        SET company_id = 3
+        WHERE company_id != 3
+        """
+    )
