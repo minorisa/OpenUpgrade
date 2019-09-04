@@ -63,6 +63,10 @@ merged_modules = {
     'website_project': 'project',
     'website_project_issue': 'project',
     'website_project_timesheet': 'hr_timesheet',
+    'test_pylint': 'test_lint',
+    # OCA/account-analytic
+    'purchase_procurement_analytic': 'procurement_mto_analytic',
+    'sale_procurement_analytic': 'procurement_mto_analytic',
     # OCA/account-invoice-reporting
     'product_brand_invoice_report': 'product_brand',
     # OCA/account-financial-reporting
@@ -101,6 +105,7 @@ merged_modules = {
     'stock_picking_transfer_lot_autoassign': 'stock_pack_operation_auto_fill',
     # OCA/web
     'web_sheet_full_width': 'web_responsive',
+    'web_widget_datepicker_options': 'web',
     'web_widget_domain_v11': 'web',
     # OCA/website
     'website_seo_redirection': 'website',

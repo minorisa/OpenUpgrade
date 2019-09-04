@@ -74,7 +74,7 @@ def convert_issues(env):
             project = env['project.project'].browse(row['id'])
             new_project = project.copy({
                 'name': project.name + ' (Issues)',
-                'task_ids': False,
+                'tasks': False,
                 'label_tasks': row['label_issues'],
             })
             # Track from what project this was duplicated
@@ -93,6 +93,8 @@ def convert_issues(env):
                 new_follower = new_project.message_follower_ids.filtered(
                     lambda x: x.partner_id == follower.partner_id
                 )
+                if not new_follower:
+                    continue
                 for subtype in subtype_dict:
                     if subtype in follower.subtype_ids:
                         new_follower.subtype_ids = [
@@ -126,9 +128,8 @@ def convert_issues(env):
                 WHEN pi.priority='2' THEN '1'
                 ELSE pi.priority
             END
-        FROM project_issue pi,
-            project_project pp
-        WHERE pi.project_id = pp.id
+        FROM project_issue pi
+            LEFT JOIN project_project pp ON pp.id = pi.project_id
         """, {
             'project_column': AsIs(issue_project_column),
             'issue_column': AsIs(origin_issue_column),

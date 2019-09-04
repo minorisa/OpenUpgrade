@@ -51,6 +51,20 @@ def link_websites_with_pages(env):
     )
 
 
+def add_redirections(env):
+    """Redirect controllers that have been moved."""
+    redirections = (
+        ("/page/contactus", "/contactus"),
+        ("/page/homepage", "/"),
+    )
+    for from_, to in redirections:
+        env["website.redirect"].create({
+            "type": "301",
+            "url_from": from_,
+            "url_to": to,
+        })
+
+
 def add_website_homepages(env):
     # Add homepage for websites
     openupgrade.logged_query(
@@ -68,6 +82,16 @@ def add_website_homepages(env):
     )
 
 
+def update_menu_urls(env):
+    """Update some menu URLs that must change."""
+    # Fix menus that include the "website." prefix
+    menus = env["website.menu"].search([
+        ("url", "=like", "/page/website.%"),
+    ])
+    for menu in menus:
+        menu.url = menu.url.replace("website.", "", 1)
+
+
 def delete_noupdate_records(env):
     """Clean data for website.menu_website deleted from noupdate data."""
     env.ref('website.menu_website').unlink()
@@ -79,12 +103,24 @@ def import_website_seo_redirection_data(env):
     """
     if not openupgrade.table_exists(env.cr, 'website_seo_redirection'):
         return
+    # Transfer normal redirections directly
     openupgrade.logged_query(
         env.cr, """
         INSERT INTO website_redirect
         (type, url_from, url_to, active, sequence)
         SELECT '301', wsr.origin, wsr.destination, True, 10
         FROM website_seo_redirection wsr""",
+    )
+    # Find relocated pages and relocate them
+    openupgrade.logged_query(
+        env.cr, """
+        UPDATE website_page wp
+        SET url = wsr.destination
+        FROM website_seo_redirection wsr
+        WHERE
+            wp.url = wsr.origin AND
+            wsr.relocate_controller AND
+            wsr.origin LIKE '/page/%%'"""
     )
 
 
@@ -115,10 +151,12 @@ def update_social_media(env):
 def migrate(env, version):
     fill_website_pages(env)
     link_websites_with_pages(env)
+    add_redirections(env)
     add_website_homepages(env)
     delete_noupdate_records(env)
     update_social_media(env)
     import_website_seo_redirection_data(env)
+    update_menu_urls(env)
     openupgrade.load_data(
         env.cr, 'website', 'migrations/11.0.1.0/noupdate_changes.xml',
     )

@@ -198,7 +198,7 @@ class account_register_payments(models.TransientModel):
             'journal_id': self.journal_id.id,
             'payment_method_id': self.payment_method_id.id,
             'payment_date': self.payment_date,
-            'communication': self.communication,
+            'communication': self.communication, # DO NOT FORWARD PORT TO V12 OR ABOVE
             'invoice_ids': [(6, 0, invoices.ids)],
             'payment_type': payment_type,
             'amount': abs(amount),
@@ -430,20 +430,25 @@ class account_payment(models.Model):
 
     @api.multi
     def button_invoices(self):
-        if self.partner_type == 'supplier':
-            views = [(self.env.ref('account.invoice_supplier_tree').id, 'tree'), (self.env.ref('account.invoice_supplier_form').id, 'form')]
-        else:
-            views = [(self.env.ref('account.invoice_tree').id, 'tree'), (self.env.ref('account.invoice_form').id, 'form')]
-        return {
+        action = {
             'name': _('Paid Invoices'),
             'view_type': 'form',
             'view_mode': 'tree,form',
             'res_model': 'account.invoice',
             'view_id': False,
-            'views': views,
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', [x.id for x in self.invoice_ids])],
         }
+        if self.partner_type == 'supplier':
+            action['views'] = [(self.env.ref('account.invoice_supplier_tree').id, 'tree'), (self.env.ref('account.invoice_supplier_form').id, 'form')]
+            action['context'] = {
+                'journal_type': 'purchase',
+                'type': 'in_invoice',
+                'default_type': 'in_invoice',
+            }
+        else:
+            action['views'] = [(self.env.ref('account.invoice_tree').id, 'tree'), (self.env.ref('account.invoice_form').id, 'form')]
+        return action
 
     @api.multi
     def button_dummy(self):
@@ -740,3 +745,17 @@ class account_payment(models.Model):
             })
 
         return vals
+
+    def _get_invoice_payment_amount(self, inv):
+        """
+        Computes the amount covered by the current payment in the given invoice.
+
+        :param inv: an invoice object
+        :returns: the amount covered by the payment in the invoice
+        """
+        self.ensure_one()
+        return sum([
+            data['amount']
+            for data in inv._get_payments_vals()
+            if data['account_payment_id'] == self.id
+        ])

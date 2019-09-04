@@ -140,8 +140,9 @@ class AccountMove(models.Model):
     def post(self):
         invoice = self._context.get('invoice', False)
         self._post_validate()
+        # Create the analytic lines in batch is faster as it leads to less cache invalidation.
+        self.mapped('line_ids').create_analytic_lines()
         for move in self:
-            move.line_ids.create_analytic_lines()
             if move.name == '/':
                 new_name = False
                 journal = move.journal_id
@@ -232,6 +233,7 @@ class AccountMove(models.Model):
     @api.multi
     def _reverse_move(self, date=None, journal_id=None):
         self.ensure_one()
+        date = date or fields.Date.today()
         with self.env.norecompute():
             reversed_move = self.copy(default={
                 'date': date,
@@ -341,7 +343,7 @@ class AccountMoveLine(models.Model):
                         else:
                             date = partial_line.credit_move_id.date if partial_line.debit_move_id == line else partial_line.debit_move_id.date
                             rate = line.currency_id.with_context(date=date).rate
-                        amount_residual_currency += sign_partial_line * line.currency_id.round(partial_line.amount * rate)
+                        amount_residual_currency += sign_partial_line * partial_line.amount * rate
 
             #computing the `reconciled` field.
             reconciled = False
@@ -472,8 +474,8 @@ class AccountMoveLine(models.Model):
     is_unaffected_earnings_line = fields.Boolean(string="Is Unaffected Earnings Line", compute="_compute_is_unaffected_earnings_line", help="Tells whether or not this line belongs to an unaffected earnings account")
 
     _sql_constraints = [
-        ('credit_debit1', 'CHECK (credit*debit=0)', 'Wrong credit or debit value in accounting entry !'),
-        ('credit_debit2', 'CHECK (credit+debit>=0)', 'Wrong credit or debit value in accounting entry !'),
+        ('credit_debit1', 'CHECK (credit*debit=0)', 'Wrong credit or debit value in accounting entry! Credit or debit should be zero.'),
+        ('credit_debit2', 'CHECK (credit+debit>=0)', 'Wrong credit or debit value in accounting entry! Credit and debit should be positive.'),
     ]
 
     @api.model
@@ -662,7 +664,7 @@ class AccountMoveLine(models.Model):
     @api.model
     def get_reconciliation_proposition(self, account_id, partner_id=False):
         """ Returns two lines whose amount are opposite """
-        
+
         target_currency = (self.currency_id and self.amount_currency) and self.currency_id or self.company_id.currency_id
         partner_id_condition = partner_id and 'AND a.partner_id = %(partner_id)s' or ''
 
@@ -848,7 +850,7 @@ class AccountMoveLine(models.Model):
                 amount_currency = line.amount_currency
 
             target_currency = target_currency or company_currency
-            
+
             ctx = context.copy()
             ctx.update({'date': target_date or line.date})
             # Use case:
@@ -857,13 +859,13 @@ class AccountMoveLine(models.Model):
             # 1)    25      0            0            NULL
             # 2)    17      0           25             EUR
             # 3)    33      0           25             YEN
-            # 
+            #
             # If we ask to see the information in the reconciliation widget in company currency, we want to see
             # The following informations
             # 1) 25 USD (no currency information)
             # 2) 17 USD [25 EUR] (show 25 euro in currency information, in the little bill)
             # 3) 33 USD [25 YEN] (show 25 yen in currencu information)
-            # 
+            #
             # If we ask to see the information in another currency than the company let's say EUR
             # 1) 35 EUR [25 USD]
             # 2) 25 EUR (no currency information)
@@ -937,7 +939,7 @@ class AccountMoveLine(models.Model):
         if len(new_mv_line_dicts) > 0:
             writeoff_lines = self.env['account.move.line']
             company_currency = self[0].account_id.company_id.currency_id
-            writeoff_currency = self[0].currency_id or company_currency
+            writeoff_currency = self[0].account_id.currency_id or company_currency
             for mv_line_dict in new_mv_line_dicts:
                 if writeoff_currency != company_currency:
                     mv_line_dict['debit'] = writeoff_currency.compute(mv_line_dict['debit'], company_currency)
@@ -1106,7 +1108,7 @@ class AccountMoveLine(models.Model):
             vals['debit'] = amount < 0 and abs(amount) or 0.0
         vals['partner_id'] = self.env['res.partner']._find_accounting_partner(self[0].partner_id).id
         company_currency = self[0].account_id.company_id.currency_id
-        writeoff_currency = self[0].currency_id or company_currency
+        writeoff_currency = self[0].account_id.currency_id or company_currency
         if not self._context.get('skip_full_reconcile_check') == 'amount_currency_excluded' and 'amount_currency' not in vals and writeoff_currency != company_currency:
             vals['currency_id'] = writeoff_currency.id
             sign = 1 if vals['debit'] > 0 else -1
@@ -1726,7 +1728,8 @@ class AccountPartialReconcile(models.Model):
         move_date = self.debit_move_id.date
         newly_created_move = self.env['account.move']
         with self.env.norecompute():
-            for move in (self.debit_move_id.move_id, self.credit_move_id.move_id):
+            # We use a set here in case the reconciled lines belong to the same move (it happens with POS)
+            for move in {self.debit_move_id.move_id, self.credit_move_id.move_id}:
                 #move_date is the max of the 2 reconciled items
                 if move_date < move.date:
                     move_date = move.date
@@ -1750,6 +1753,9 @@ class AccountPartialReconcile(models.Model):
                                 'debit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
                                 'credit': rounded_amt if rounded_amt > 0 else 0.0,
                                 'account_id': line.account_id.id,
+                                # DO NOT FORWARD-PORT!!! ONLY FOR v11
+                                'analytic_account_id': line.analytic_account_id.id,
+                                'analytic_tag_ids': line.analytic_tag_ids.ids,
                                 'tax_exigible': True,
                                 'amount_currency': line.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
                                 'currency_id': line.currency_id.id,
@@ -1762,6 +1768,9 @@ class AccountPartialReconcile(models.Model):
                                 'debit': rounded_amt if rounded_amt > 0 else 0.0,
                                 'credit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
                                 'account_id': line.tax_line_id.cash_basis_account.id,
+                                # DO NOT FORWARD-PORT!!! ONLY FOR v11
+                                'analytic_account_id': line.analytic_account_id.id,
+                                'analytic_tag_ids': line.analytic_tag_ids.ids,
                                 'tax_line_id': line.tax_line_id.id,
                                 'tax_exigible': True,
                                 'amount_currency': line.amount_currency and line.currency_id.round(line.amount_currency * amount / line.balance) or 0.0,
@@ -1903,12 +1912,13 @@ class AccountPartialReconcile(models.Model):
         # Get value of matched percentage from both move before reconciliating
         lines = self.env['account.move.line'].browse(aml)
         lines._payment_invoice_match()
-        if lines[0].account_id.internal_type in ('receivable', 'payable'):
+        tax_cash_basis_entry = not self.env.context.get('skip_tax_cash_basis_entry') and lines[0].account_id.internal_type in ('receivable', 'payable')
+        if tax_cash_basis_entry:
             percentage_before_rec = lines._get_matched_percentage()
         # Reconcile
         res = super(AccountPartialReconcile, self).create(vals)
         # if the reconciliation is a matching on a receivable or payable account, eventually create a tax cash basis entry
-        if lines[0].account_id.internal_type in ('receivable', 'payable'):
+        if tax_cash_basis_entry:
             res.create_tax_cash_basis_entry(percentage_before_rec)
         res._compute_partial_lines()
         return res
