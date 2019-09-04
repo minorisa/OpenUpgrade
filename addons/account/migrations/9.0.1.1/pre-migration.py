@@ -409,12 +409,13 @@ def migrate(env, version):
     fast_create(env, FAST_CREATIONS)
 
     # Fast create other fields, in the simple case of mono currency
-    cr.execute("""
-    SELECT ai.currency_id, rc.currency_id
-    FROM account_invoice ai
-    INNER JOIN res_company rc on ai.company_id = rc.id
-    WHERE ai.currency_id != rc.currency_id;
-    """)
-    multi_currency = cr.fetchone()
-    if not multi_currency:
-        fast_create(env, MONO_CURRENCY_FAST_CREATIONS)
+    # cr.execute("""
+    # SELECT ai.currency_id, rc.currency_id
+    # FROM account_invoice ai
+    # INNER JOIN res_company rc on ai.company_id = rc.id
+    # WHERE ai.currency_id != rc.currency_id;
+    # """)
+    # multi_currency = cr.fetchone()
+    # if not multi_currency:
+    #     fast_create(env, MONO_CURRENCY_FAST_CREATIONS)
+    fast_create(env, MONO_CURRENCY_FAST_CREATIONS)
