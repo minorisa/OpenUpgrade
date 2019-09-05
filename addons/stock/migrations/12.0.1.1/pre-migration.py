@@ -52,6 +52,7 @@ def switch_stock_xml_id_noupdate(cr):
 
 @openupgrade.migrate(use_env=False)
 def migrate(cr, version):
+    pass
     # openupgrade.copy_columns(cr, _column_copies)
     # openupgrade.rename_columns(cr, _column_renames)
     # openupgrade.rename_models(cr, _model_renames)
