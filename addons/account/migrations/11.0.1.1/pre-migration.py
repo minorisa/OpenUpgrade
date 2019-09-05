@@ -49,3 +49,9 @@ def migrate(env, version):
              'monetary', False, 'account'),
         ]
     )
+    openupgrade.logged_query(
+        env.cr, """
+        ALTER TABLE account_invoice 
+        ADD COLUMN activity_date_deadline date;
+        """
+    )
