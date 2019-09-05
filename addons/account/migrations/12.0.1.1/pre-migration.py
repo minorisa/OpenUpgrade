@@ -125,3 +125,25 @@ def migrate(env, version):
             env.cr, """
             ALTER TABLE res_company ADD COLUMN incoterm_id INTEGER""",
         )
+    if not openupgrade.column_exists(
+            env.cr, 'account_invoice', 'vendor_display_name'):
+        openupgrade.logged_query(
+            env.cr, """
+            ALTER TABLE account_invoice ADD COLUMN vendor_display_name VARCHAR;
+            """
+        )
+    if not openupgrade.column_exists(
+            env.cr, 'account_invoice', 'invoice_icon'):
+        openupgrade.logged_query(
+            env.cr, """
+            ALTER TABLE account_invoice ADD COLUMN invoice_icon VARCHAR;
+            """
+        )
+    openupgrade.logged_query(
+        env.cr, """
+        UPDATE account_invoice 
+        SET vendor_display_name = res_partner.name, invoice_icon = ''
+        FROM res_partner
+        WHERE account_invoice.partner_id = res_partner.id;
+        """
+    )
