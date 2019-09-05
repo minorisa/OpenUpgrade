@@ -53,9 +53,7 @@ def fill_account_invoice_line_total(env):
             SELECT ail.id,
                 COUNT(at.id) AS rnum,
                 MIN(CASE WHEN at.amount_type = 'percent' THEN 0 ELSE 1 END)
-                    AS amount_type,
-                MIN(CASE WHEN at.price_include THEN 0 ELSE 1 END)
-                    AS price_include
+                    AS amount_type
             FROM account_invoice_line ail,
                 account_invoice_line_tax rel,
                 account_tax at
@@ -65,8 +63,7 @@ def fill_account_invoice_line_total(env):
             GROUP BY ail.id
         ) sub
         WHERE sub.rnum = 1
-            AND sub.amount_type = 0
-            AND sub.price_include = 1"""
+            AND sub.amount_type = 0"""
     )
     simple_lines = line_obj.browse([x[0] for x in env.cr.fetchall()])
     if simple_lines:
@@ -88,24 +85,24 @@ def fill_account_invoice_line_total(env):
                 AND ail.id IN %s""", (tuple(simple_lines.ids), ),
         )
     # Compute the rest (which should be minority) with regular method
-    rest_lines = line_obj.search([]) - empty_lines - simple_lines
-    openupgrade.logger.debug("Compute the rest of the account.invoice.line"
-                             "totals: %s" % len(rest_lines))
-    for line in rest_lines:
-        # avoid error on taxes with other type of computation ('code' for
-        # example, provided by module `account_tax_python`). We will need to
-        # add the computation on the corresponding module post-migration.
-        types = ['percent', 'fixed', 'group', 'division']
-        if any(x.amount_type not in types for x in line.invoice_line_tax_ids):
-            continue
-        # This has been extracted from `_compute_price` method
-        currency = line.invoice_id and line.invoice_id.currency_id or None
-        price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-        taxes = line.invoice_line_tax_ids.compute_all(
-            price, currency, line.quantity, product=line.product_id,
-            partner=line.invoice_id.partner_id,
-        )
-        line.price_total = taxes['total_included']
+    # rest_lines = line_obj.search([]) - empty_lines - simple_lines
+    # openupgrade.logger.debug("Compute the rest of the account.invoice.line"
+    #                          "totals: %s" % len(rest_lines))
+    # for line in rest_lines:
+    #     # avoid error on taxes with other type of computation ('code' for
+    #     # example, provided by module `account_tax_python`). We will need to
+    #     # add the computation on the corresponding module post-migration.
+    #     types = ['percent', 'fixed', 'group', 'division']
+    #     if any(x.amount_type not in types for x in line.invoice_line_tax_ids):
+    #         continue
+    #     # This has been extracted from `_compute_price` method
+    #     currency = line.invoice_id and line.invoice_id.currency_id or None
+    #     price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+    #     taxes = line.invoice_line_tax_ids.compute_all(
+    #         price, currency, line.quantity, product=line.product_id,
+    #         partner=line.invoice_id.partner_id,
+    #     )
+    #     line.price_total = taxes['total_included']
     openupgrade.logger.debug("Compute finished")
 
 
