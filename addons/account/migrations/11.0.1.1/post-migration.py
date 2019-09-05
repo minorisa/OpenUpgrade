@@ -46,14 +46,16 @@ def fill_account_invoice_line_total(env):
             SET price_total = price_subtotal
             WHERE id IN %s""", (tuple(empty_lines.ids), )
         )
-    # Now we compute easily the lines with only 1 tax, no included in price,
+    # Now we compute easily the lines with only 1 tax, included in price,
     # and that tax is simply a percentage (which are most of the cases)
     env.cr.execute(
         """SELECT id FROM (
             SELECT ail.id,
                 COUNT(at.id) AS rnum,
                 MIN(CASE WHEN at.amount_type = 'percent' THEN 0 ELSE 1 END)
-                    AS amount_type
+                    AS amount_type,
+                MIN(CASE WHEN at.price_include THEN 1 ELSE 0 END)
+                    AS price_include
             FROM account_invoice_line ail,
                 account_invoice_line_tax rel,
                 account_tax at
@@ -63,17 +65,16 @@ def fill_account_invoice_line_total(env):
             GROUP BY ail.id
         ) sub
         WHERE sub.rnum = 1
-            AND sub.amount_type = 0"""
+            AND sub.amount_type = 0
+            AND sub.price_include = 1"""
     )
     simple_lines = line_obj.browse([x[0] for x in env.cr.fetchall()])
     if simple_lines:
         openupgrade.logged_query(
             env.cr, """
             UPDATE account_invoice_line ail
-            SET price_total = ail.price_subtotal + round(
-                ail.price_unit * ail.quantity *
-                (1 - COALESCE(ail.discount, 0.0) / 100.0) *
-                at.amount / 100.0, CEIL(LOG(1.0 / cur.rounding))::INTEGER)
+            SET price_subtotal = ROUND(ail.price_unit * ail.quantity * (1 - COALESCE(ail.discount, 0.0) / 100.0) 
+            / (1 + at.amount / 100.0), CEIL(LOG(1.0 / cur.rounding))::INTEGER)
             FROM account_tax at,
                 account_invoice_line_tax rel,
                 account_invoice ai,
