@@ -158,16 +158,16 @@ def merge_stock_putaway_product(cr):
 @openupgrade.migrate()
 def migrate(env, version):
     cr = env.cr
-    env['stock.location']._parent_store_compute()
-    map_stock_rule_action(cr)
-    fill_stock_picking_type_barcode(env)
-    merge_stock_location_path_stock_rule(env)
-    fill_stock_package_level(env)
-    merge_stock_putaway_product(cr)
-    openupgrade.load_data(
-        cr, 'stock', 'migrations/12.0.1.1/noupdate_changes.xml')
-    openupgrade.delete_records_safely_by_xml_id(
-        env, [
-            'stock.stock_location_path_comp_rule',
-        ],
-    )
+    # env['stock.location']._parent_store_compute()
+    # map_stock_rule_action(cr)
+    # fill_stock_picking_type_barcode(env)
+    # merge_stock_location_path_stock_rule(env)
+    # fill_stock_package_level(env)
+    # merge_stock_putaway_product(cr)
+    # openupgrade.load_data(
+    #     cr, 'stock', 'migrations/12.0.1.1/noupdate_changes.xml')
+    # openupgrade.delete_records_safely_by_xml_id(
+    #     env, [
+    #         'stock.stock_location_path_comp_rule',
+    #     ],
+    # )

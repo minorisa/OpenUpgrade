@@ -52,21 +52,21 @@ def switch_stock_xml_id_noupdate(cr):
 
 @openupgrade.migrate(use_env=False)
 def migrate(cr, version):
-    openupgrade.copy_columns(cr, _column_copies)
-    openupgrade.rename_columns(cr, _column_renames)
-    openupgrade.rename_models(cr, _model_renames)
-    openupgrade.rename_tables(cr, _table_renames)
-    switch_stock_xml_id_noupdate(cr)
-    cr.execute(
-        """
-        ALTER TABLE stock_rule
-        ADD COLUMN {} integer;
-        """.format(openupgrade.get_legacy_name('loc_path_id'))
-    )
-    if openupgrade.table_exists(cr, 'stock_product_putaway_strategy'):
-        cr.execute(
-            """
-            ALTER TABLE stock_fixed_putaway_strat
-            ADD COLUMN {} integer;
-            """.format(openupgrade.get_legacy_name('old_strat_id'))
-        )
+    # openupgrade.copy_columns(cr, _column_copies)
+    # openupgrade.rename_columns(cr, _column_renames)
+    # openupgrade.rename_models(cr, _model_renames)
+    # openupgrade.rename_tables(cr, _table_renames)
+    # switch_stock_xml_id_noupdate(cr)
+    # cr.execute(
+    #     """
+    #     ALTER TABLE stock_rule
+    #     ADD COLUMN {} integer;
+    #     """.format(openupgrade.get_legacy_name('loc_path_id'))
+    # )
+    # if openupgrade.table_exists(cr, 'stock_product_putaway_strategy'):
+    #     cr.execute(
+    #         """
+    #         ALTER TABLE stock_fixed_putaway_strat
+    #         ADD COLUMN {} integer;
+    #         """.format(openupgrade.get_legacy_name('old_strat_id'))
+    #     )
