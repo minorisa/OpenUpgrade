@@ -15,10 +15,14 @@ renamed_modules = {
     'product_uom_unece': 'uom_unece',
     # OCA/crm > OCA/partner-contact
     'crm_deduplicate_acl': 'partner_deduplicate_acl',
+    'crm_deduplicate_by_ref': 'partner_deduplicate_by_ref',
+    'crm_deduplicate_by_website': 'partner_deduplicate_by_website',
     'crm_deduplicate_filter': 'partner_deduplicate_filter',
     # OCA/hr
     'hr_employee_seniority': 'hr_employee_service_contract',
     'hr_family': 'hr_employee_relative',
+    # OCA/server-brand
+    'res_config_settings_enterprise_remove': 'remove_odoo_enterprise',
     # OCA/stock-logistics-workflow
     'stock_pack_operation_auto_fill': 'stock_move_line_auto_fill',
 }
@@ -38,11 +42,15 @@ merged_modules = {
     'website_sale_options': 'website_sale',
     'website_sale_stock_options': 'website_sale_stock',
     'test_pylint': 'test_lint',
+    # OCA/account-analytic
+    # although model is defined in "analytic", logic is in "account"
+    'account_analytic_distribution': 'account',
     # OCA/account-financial-reporting
     'customer_activity_statement': 'partner_statement',
     'customer_outstanding_statement': 'partner_statement',
     # OCA/account-financial-tools
     'account_asset': 'account_asset_management',
+    'account_asset_disposal': 'account_asset_management',
     'account_reversal': 'account',
     # OCA/e-commerce
     'website_sale_default_country': 'website_sale',
@@ -72,8 +80,10 @@ renamed_models = {
     'hr.holidays': 'hr.leave',
     'hr.holidays.status': 'hr.leave.type',
     'mrp.repair': 'repair.order',
+    'mrp.repair.cancel': 'repair.cancel',
     'mrp.repair.fee': 'repair.fee',
     'mrp.repair.line': 'repair.line',
+    'mrp.repair.make_invoice': 'repair.order.make_invoice',
     'procurement.rule': 'stock.rule',
     'product.attribute.line': 'product.template.attribute.line',
     'product.attribute.price': 'product.template.attribute.value',
@@ -83,9 +93,14 @@ renamed_models = {
     'sale.quote.option': 'sale.order.template.option',
     'sale.quote.template': 'sale.order.template',
     'stock.incoterms': 'account.incoterms',
-    # 'stock.location.path': 'stock.rule', handled in 'stock'
     # OCA/account-financial-tools
     'account.asset.asset': 'account.asset',
     'account.asset.depreciation.line': 'account.asset.line',
     'account.asset.category': 'account.asset.profile',
+}
+
+# only used here for openupgrade_records analysis:
+merged_models = {
+    # Odoo
+    'stock.location.path': 'stock.rule',
 }

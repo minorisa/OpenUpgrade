@@ -19,8 +19,18 @@ def module_map(module):
         module, apriori.merged_modules.get(module, module))
 
 
-def model_map(model):
+def model_rename_map(model):
     return apriori.renamed_models.get(model, model)
+
+
+def model_map(model):
+    return apriori.renamed_models.get(
+        model, apriori.merged_models.get(model, model))
+
+
+def inv_model_map(model):
+    inv_model_map_dict = {v: k for k, v in apriori.renamed_models.items()}
+    return inv_model_map_dict.get(model, model)
 
 
 IGNORE_FIELDS = [
@@ -45,11 +55,14 @@ def compare_records(dict_old, dict_new, fields):
             if module_map(dict_old['module']) != dict_new['module']:
                 return False
         elif field == 'model':
-            if model_map(dict_old['model']) != dict_new['model']:
+            if model_rename_map(dict_old['model']) != dict_new['model']:
                 return False
-        elif field == 'original_module':
-            if dict_old['original_module'] != dict_old['prefix'] or \
-                    dict_new['original_module'] != dict_new['prefix']:
+        elif field == 'other_prefix':
+            if dict_old['module'] != dict_old['prefix'] or \
+                    dict_new['module'] != dict_new['prefix']:
+                return False
+            if dict_old['model'] == 'ir.ui.view':
+                # basically, to avoid the assets_backend case
                 return False
         elif dict_old[field] != dict_new[field]:
             return False
@@ -153,7 +166,6 @@ def compare_sets(old_records, new_records):
         result = []
         for record in records:
             if record['field'] not in IGNORE_FIELDS:
-                record['matched'] = False
                 result.append(record)
         return result
 
@@ -167,7 +179,6 @@ def compare_sets(old_records, new_records):
     matched_direct = 0
     matched_other_module = 0
     matched_other_type = 0
-    matched_other_name = 0
     in_obsolete_models = 0
 
     obsolete_models = []
@@ -175,23 +186,17 @@ def compare_sets(old_records, new_records):
         if model not in new_models:
             if model_map(model) not in new_models:
                 obsolete_models.append(model)
-                reprs['general'].append('obsolete model %s' % model)
-            else:
-                reprs['general'].append('obsolete model %s (renamed to %s)' % (
-                    model, model_map(model)))
 
+    non_obsolete_old_records = []
     for column in copy.copy(old_records):
         if column['model'] in obsolete_models:
-            old_records.remove(column)
             in_obsolete_models += 1
-
-    for model in new_models:
-        if model not in old_models:
-            reprs['general'].append('new model %s' % model)
+        else:
+            non_obsolete_old_records.append(column)
 
     def match(match_fields, report_fields, warn=False):
         count = 0
-        for column in copy.copy(old_records):
+        for column in copy.copy(non_obsolete_old_records):
             found = search(column, new_records, match_fields)
             if found:
                 if warn:
@@ -199,6 +204,7 @@ def compare_sets(old_records, new_records):
                     # print "Tentatively"
                 report_generic(found, column, report_fields, reprs)
                 old_records.remove(column)
+                non_obsolete_old_records.remove(column)
                 new_records.remove(found)
                 count += 1
         return count
@@ -219,12 +225,6 @@ def compare_sets(old_records, new_records):
         ['mode', 'model', 'field'],
         ['relation', 'type', 'selection_keys', 'inherits', 'stored',
          'isfunction', 'isrelated', 'required', 'table', 'oldname'])
-
-    # fields with other names
-    # matched_other_name = match(
-    # ['module', 'type', 'relation'],
-    # ['field', 'relation', 'type', 'selection_keys',
-    #   'inherits', 'isfunction', 'required'], warn=True)
 
     printkeys = [
         'relation', 'required', 'selection_keys',
@@ -273,7 +273,6 @@ def compare_sets(old_records, new_records):
             "# Direct match: %d" % matched_direct,
             "# Found in other module: %d" % matched_other_module,
             "# Found with different type: %d" % matched_other_type,
-            "# Found with different name: %d" % matched_other_name,
             "# In obsolete models: %d" % in_obsolete_models,
             "# Not matched: %d" % len(old_records),
             "# New columns: %d" % len(new_records)
@@ -285,51 +284,53 @@ def compare_sets(old_records, new_records):
 def compare_xml_sets(old_records, new_records):
     reprs = collections.defaultdict(list)
 
+    def match(match_fields, match_type='direct'):
+        matched_records = []
+        for column in copy.copy(old_records):
+            found = search(column, new_records, match_fields)
+            if found:
+                old_records.remove(column)
+                new_records.remove(found)
+                if match_type != 'direct':
+                    column['old'] = True
+                    found['new'] = True
+                    column[match_type] = found['module']
+                    found[match_type] = column['module']
+                found['domain'] = column['domain'] != found['domain'] and \
+                    column['domain'] != '[]' and found['domain'] is False
+                column['domain'] = False
+                column['noupdate_switched'] = False
+                found['noupdate_switched'] = \
+                    column['noupdate'] != found['noupdate']
+                if match_type != 'direct':
+                    matched_records.append(column)
+                    matched_records.append(found)
+                elif (match_type == 'direct' and found['domain']) or \
+                        found['noupdate_switched']:
+                    matched_records.append(found)
+        return matched_records
+
     # direct match
-    match_fields = ['module', 'model', 'name']
-    for column in copy.copy(old_records):
-        found = search(column, new_records, match_fields)
-        if found:
-            old_records.remove(column)
-            new_records.remove(found)
+    modified_records = match(['module', 'model', 'name'])
 
     # other module, same full xmlid
-    match_fields = ['model', 'name']
-    moved_records = []
-    for column in copy.copy(old_records):
-        found = search(column, new_records, match_fields)
-        if found:
-            old_records.remove(column)
-            new_records.remove(found)
-            column['old'] = True
-            found['new'] = True
-            column['moved'] = found['module']
-            found['moved'] = module_map(column['module'])
-            moved_records.append(column)
-            moved_records.append(found)
+    moved_records = match(['model', 'name'], 'moved')
 
-    # other module, same suffix, other prefix (with original_module == prefix)
-    match_fields = ['model', 'suffix', 'original_module']
-    renamed_records = []
-    for column in copy.copy(old_records):
-        found = search(column, new_records, match_fields)
-        if found:
-            old_records.remove(column)
-            new_records.remove(found)
-            column['old'] = True
-            found['new'] = True
-            column['renamed'] = found['module']
-            found['renamed'] = module_map(column['module'])
-            renamed_records.append(column)
-            renamed_records.append(found)
+    # other module, same suffix, other prefix
+    renamed_records = match(['model', 'suffix', 'other_prefix'], 'renamed')
 
     for record in old_records:
         record['old'] = True
+        record['domain'] = False
+        record['noupdate_switched'] = False
     for record in new_records:
         record['new'] = True
+        record['domain'] = False
+        record['noupdate_switched'] = False
 
     sorted_records = sorted(
-        old_records + new_records + moved_records + renamed_records,
+        old_records + new_records + moved_records + renamed_records +
+        modified_records,
         key=lambda k: (k['model'], 'old' in k, k['name'])
     )
     for entry in sorted_records:
@@ -346,7 +347,97 @@ def compare_xml_sets(old_records, new_records):
                 content += ' [potentially moved from %(moved)s module]' % entry
             elif 'renamed' in entry:
                 content += ' [renamed from %(renamed)s module]' % entry
+        if 'old' not in entry and 'new' not in entry:
+            content = '%(model)s: %(name)s' % entry
+        if entry['domain']:
+            content += ' (deleted domain)'
         if entry['noupdate']:
             content += ' (noupdate)'
+        if entry['noupdate_switched']:
+            content += ' (noupdate switched)'
         reprs[module_map(entry['module'])].append(content)
+    return reprs
+
+
+def compare_model_sets(old_records, new_records):
+    """
+    Compare a set of OpenUpgrade model representations.
+    """
+    reprs = collections.defaultdict(list)
+
+    new_models = {column['model']: column['module'] for column in new_records}
+    old_models = {column['model']: column['module'] for column in old_records}
+
+    obsolete_models = []
+    for column in copy.copy(old_records):
+        model = column['model']
+        if model in old_models:
+            if model not in new_models:
+                if model_map(model) not in new_models:
+                    obsolete_models.append(model)
+                    text = 'obsolete model %s' % model
+                    if column['model_type']:
+                        text += " [%s]" % column['model_type']
+                    reprs[module_map(column['module'])].append(text)
+                    reprs['general'].append('obsolete model %s [module %s]' % (
+                        model, module_map(column['module'])))
+                else:
+                    moved_module = ''
+                    if module_map(column['module']) != new_models[model_map(
+                            model)]:
+                        moved_module = ' in module %s' % new_models[model_map(
+                            model)]
+                    text = 'obsolete model %s (renamed to %s%s)' % (
+                        model, model_map(model), moved_module)
+                    if column['model_type']:
+                        text += " [%s]" % column['model_type']
+                    reprs[module_map(column['module'])].append(text)
+                    reprs['general'].append(
+                        'obsolete model %s (renamed to %s) [module %s]' % (
+                            model, model_map(model),
+                            module_map(column['module'])))
+            else:
+                if module_map(column['module']) != new_models[model]:
+                    text = 'model %s (moved to %s)' % (
+                        model, new_models[model])
+                    if column['model_type']:
+                        text += " [%s]" % column['model_type']
+                    reprs[module_map(column['module'])].append(text)
+                    text = 'model %s (moved from %s)' % (
+                        model, old_models[model])
+                    if column['model_type']:
+                        text += " [%s]" % column['model_type']
+
+    for column in copy.copy(new_records):
+        model = column['model']
+        if model in new_models:
+            if model not in old_models:
+                if inv_model_map(model) not in old_models:
+                    text = 'new model %s' % model
+                    if column['model_type']:
+                        text += " [%s]" % column['model_type']
+                    reprs[column['module']].append(text)
+                    reprs['general'].append('new model %s [module %s]' % (
+                        model, column['module']))
+                else:
+                    moved_module = ''
+                    if column['module'] != module_map(old_models[inv_model_map(
+                            model)]):
+                        moved_module = ' in module %s' % old_models[
+                            inv_model_map(model)]
+                    text = 'new model %s (renamed from %s%s)' % (
+                        model, inv_model_map(model), moved_module)
+                    if column['model_type']:
+                        text += " [%s]" % column['model_type']
+                    reprs[column['module']].append(text)
+                    reprs['general'].append(
+                        'new model %s (renamed from %s) [module %s]' % (
+                            model, inv_model_map(model), column['module']))
+            else:
+                if column['module'] != module_map(old_models[model]):
+                    text = 'model %s (moved from %s)' % (
+                        model, old_models[model])
+                    if column['model_type']:
+                        text += " [%s]" % column['model_type']
+                    reprs[column['module']].append(text)
     return reprs

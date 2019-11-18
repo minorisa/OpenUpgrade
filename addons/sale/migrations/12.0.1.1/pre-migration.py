@@ -18,11 +18,30 @@ _column_renames = {
     ],
 }
 
+_column_renames2 = {
+    'sale_order': [
+        ('require_payment', None),
+    ],
+}
+
 _field_renames_order_dates = [
     ('sale.order', 'sale_order', 'commitment_date',
      openupgrade.get_legacy_name('commitment_date')),
     ('sale.order', 'sale_order', 'requested_date', 'commitment_date'),
 ]
+
+
+_config_param_renames = [
+    ('sale_payment.automatic_invoice', 'sale.automatic_invoice'),
+    ('sale_payment.default_email_template', 'sale.default_email_template'),
+]
+
+
+def rename_sale_payment_config_parameters(cr, keys_spec):
+    for (old, new) in keys_spec:
+        query = ("UPDATE ir_config_parameter SET key = %s "
+                 "WHERE key = %s")
+        openupgrade.logged_query(cr, query, (new, old))
 
 
 def fill_sale_order_line_sections(cr):
@@ -58,17 +77,30 @@ def fill_sale_order_line_sections(cr):
     openupgrade.logged_query(
         cr, """
         INSERT INTO sale_order_line (order_id, layout_category_id,
-            sequence, name, price_unit, product_uom_qty, customer_lead,
+            sequence, name,
+            price_unit, product_uom_qty, customer_lead,
             display_type, create_uid, create_date, write_uid, write_date)
         SELECT sol.order_id, sol.layout_category_id,
-            min(sol.sequence) -1 as sequence, max(slc.name), 0, 0, 0,
-            'line_section', min(sol.create_uid), min(sol.create_date),
+            min(sol.sequence) -1 as sequence, max(COALESCE(slc.name, ' ')),
+            0, 0, 0, 'line_section', min(sol.create_uid), min(sol.create_date),
             min(sol.write_uid), min(sol.write_date)
         FROM sale_order_line sol
-        INNER JOIN sale_layout_category slc ON slc.id = sol.layout_category_id
+        LEFT JOIN sale_layout_category slc ON slc.id = sol.layout_category_id
         GROUP BY order_id, layout_category_id
         ORDER BY order_id, layout_category_id, sequence
         """
+    )
+    # We remove recently created sale.order.line for sections on sales orders
+    # where there's no sections at all
+    openupgrade.logged_query(
+        cr, """
+        DELETE FROM sale_order_line
+        WHERE layout_category_id IS NULL
+            AND display_type = 'line_section'
+            AND order_id NOT IN (
+                SELECT order_id FROM sale_order_line
+                WHERE layout_category_id IS NOT NULL
+            )""",
     )
 
 
@@ -78,9 +110,13 @@ def migrate(env, version):
     if openupgrade.column_exists(env.cr, 'sale_order', 'payment_tx_id'):
         # from sale_payment module
         openupgrade.rename_columns(env.cr, _column_renames)
+        rename_sale_payment_config_parameters(env.cr, _config_param_renames)
     if openupgrade.column_exists(env.cr, 'sale_order', 'requested_date'):
         # from sale_order_dates module
         openupgrade.rename_fields(env, _field_renames_order_dates)
+    if openupgrade.table_exists(env.cr, 'sale_quote_line'):
+        # from website_quote module
+        openupgrade.rename_columns(env.cr, _column_renames2)
     fill_sale_order_line_sections(env.cr)
     openupgrade.logged_query(
         env.cr,
