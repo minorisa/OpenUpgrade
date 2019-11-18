@@ -113,11 +113,11 @@ def switch_noupdate_flag(cr):
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     cr = env.cr
-    openupgrade.logged_query(
-        cr, """
-        REINDEX INDEX ir_translation_src_hash_idx;
-        """
-    )
+    # openupgrade.logged_query(
+    #     cr, """
+    #     REINDEX INDEX ir_translation_src_hash_idx;
+    #     """
+    # )
     openupgrade.logged_query(
         cr, """
         DELETE FROM ir_module_module WHERE name = 'disable_openerp_online';
