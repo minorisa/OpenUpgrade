@@ -105,16 +105,16 @@ def fill_account_invoice_line_sections(cr):
     )
     # We remove recently created account.invoice.line for sections on invoices
     # where there's no sections at all
-    openupgrade.logged_query(
-        cr, """
-        DELETE FROM account_invoice_line
-        WHERE layout_category_id IS NULL
-            AND display_type = 'line_section'
-            AND invoice_id NOT IN (
-                SELECT invoice_id FROM account_invoice_line
-                WHERE layout_category_id IS NOT NULL
-            )""",
-    )
+    # openupgrade.logged_query(
+    #     cr, """
+    #     DELETE FROM account_invoice_line
+    #     WHERE layout_category_id IS NULL
+    #         AND display_type = 'line_section'
+    #         AND invoice_id NOT IN (
+    #             SELECT invoice_id FROM account_invoice_line
+    #             WHERE layout_category_id IS NOT NULL
+    #         )""",
+    # )
 
 
 @openupgrade.migrate()
