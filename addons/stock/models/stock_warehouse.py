@@ -238,15 +238,16 @@ class Warehouse(models.Model):
         update the rules contained in global routes in order to make them match
         with the wanted reception, delivery,... steps.
         """
-        for rule_field, rule_details in self._get_global_route_rules_values().items():
-            values = rule_details['update_values']
-            if self[rule_field]:
-                self[rule_field].write(values)
-            else:
-                values.update(rule_details['create_values'])
-                values.update({'warehouse_id': self.id})
-                self[rule_field] = self.env['stock.rule'].create(values)
         return True
+        # for rule_field, rule_details in self._get_global_route_rules_values().items():
+        #     values = rule_details['update_values']
+        #     if self[rule_field]:
+        #         self[rule_field].write(values)
+        #     else:
+        #         values.update(rule_details['create_values'])
+        #         values.update({'warehouse_id': self.id})
+        #         self[rule_field] = self.env['stock.rule'].create(values)
+        # return True
 
     def _find_global_route(self, xml_id, route_name):
         """ return a route record set from an xml_id or its name. """
