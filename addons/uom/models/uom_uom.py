@@ -82,6 +82,7 @@ class UoM(models.Model):
             NOTE: this is a constraint on the all table. This might not be a good practice, but this is
             not possible to do it in SQL directly.
         """
+        return
         category_ids = self.mapped('category_id').ids
         self._cr.execute("""
             SELECT C.id AS category_id, count(U.id) AS uom_count
