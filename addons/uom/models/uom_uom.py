@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import logging
 from odoo import api, fields, tools, models, _
 from odoo.exceptions import UserError, ValidationError
-
-_logger = logging.getLogger(__name__)
 
 
 class UoMCategory(models.Model):
@@ -82,7 +79,6 @@ class UoM(models.Model):
             NOTE: this is a constraint on the all table. This might not be a good practice, but this is
             not possible to do it in SQL directly.
         """
-        return
         category_ids = self.mapped('category_id').ids
         self._cr.execute("""
             SELECT C.id AS category_id, count(U.id) AS uom_count
