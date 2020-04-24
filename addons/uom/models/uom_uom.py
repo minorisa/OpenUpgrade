@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
 from odoo import api, fields, tools, models, _
 from odoo.exceptions import UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class UoMCategory(models.Model):
@@ -88,6 +91,7 @@ class UoM(models.Model):
             GROUP BY C.id
         """, (tuple(category_ids),))
         for uom_data in self._cr.dictfetchall():
+            _logger.info(uom_data)
             if uom_data['uom_count'] == 0:
                 raise ValidationError(_("UoM category %s should have a reference unit of measure. If you just created a new category, please record the 'reference' unit first.") % (self.env['uom.category'].browse(uom_data['category_id']).name,))
             if uom_data['uom_count'] > 1:
