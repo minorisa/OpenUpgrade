@@ -101,6 +101,7 @@ column_copies = {
     'account_tax': [
         ('type_tax_use', None, None),
         ('type', None, None),
+        ('tax_code_id', 'tax_group_id', None),
     ],
     'account_tax_template': [
         ('type_tax_use', None, None),
@@ -163,10 +164,9 @@ FAST_CREATIONS = [
     UPDATE account_invoice
     SET amount_total_signed = - amount_total
     WHERE type IN ('in_refund', 'out_refund');
-    """)
-]
-
-MONO_CURRENCY_FAST_CREATIONS = [
+    """),
+    # For multicurrency invoices, these values will be overwritten
+    # in the post script
     ('account_invoice', 'amount_total_company_signed', 'numeric', """
     UPDATE account_invoice
     SET amount_total_company_signed = amount_total_signed;
@@ -390,6 +390,23 @@ def migrate(env, version):
         "update account_account set reconcile=True "
         "where type in ('receivable', 'payable')"
     )
+
+    # Move obsolete table from connector_ecommerce out of the way to
+    # prevent name conflict with new Odoo table
+    if openupgrade.table_exists(cr, 'account_tax_group'):
+        cr.execute(
+            """ SELECT count(*) FROM ir_model_data
+            WHERE name = 'model_account_tax_group'
+            AND module = 'connector_ecommerce' """)
+        if cr.fetchone()[0]:
+            logger.info(
+                "Moving connector_ecommerce's account_tax_group "
+                "table out of the way.")
+            openupgrade.rename_columns(
+                cr, {'account_tax': [('group_id', None)]})
+            openupgrade.rename_tables(
+                cr, [('account_tax_group', None)])
+
     openupgrade.rename_tables(cr, table_renames)
     openupgrade.rename_columns(cr, column_renames)
     openupgrade.rename_xmlids(cr, xmlid_renames)
@@ -407,14 +424,15 @@ def migrate(env, version):
 
     # Fast Create new fields
     fast_create(env, FAST_CREATIONS)
-
-    # Fast create other fields, in the simple case of mono currency
-    cr.execute("""
-    SELECT ai.currency_id, rc.currency_id
-    FROM account_invoice ai
-    INNER JOIN res_company rc on ai.company_id = rc.id
-    WHERE ai.currency_id != rc.currency_id;
-    """)
-    multi_currency = cr.fetchone()
-    if not multi_currency:
-        fast_create(env, MONO_CURRENCY_FAST_CREATIONS)
+    openupgrade.add_fields(
+        env, [
+            ('matched_percentage', 'account.move', 'account_move',
+             'float', False, 'account'),
+            ('debit_cash_basis', 'account.move.line', 'account_move_line',
+             'monetary', False, 'account'),
+            ('credit_cash_basis', 'account.move.line', 'account_move_line',
+             'monetary', False, 'account'),
+            ('balance_cash_basis', 'account.move.line', 'account_move_line',
+             'monetary', False, 'account'),
+        ]
+    )

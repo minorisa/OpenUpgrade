@@ -81,6 +81,7 @@ merged_modules = [
     ('hr_applicant_document', 'hr_recruitment'),
     ('portal_project', 'project'),
     ('portal_project_issue', 'project_issue'),
+    ('purchase_double_validation', 'purchase'),
     ('procurement_jit_stock', 'procurement_jit'),
     ('web_gantt', 'web'),
     ('web_graph', 'web'),
@@ -139,4 +140,7 @@ merged_modules = [
 ]
 
 renamed_models = {
+    "crm.tracking.campaign": "utm.campaign",
+    "crm.tracking.medium": "utm.medium",
+    "crm.tracking.source": "utm.source",
 }

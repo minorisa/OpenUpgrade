@@ -41,6 +41,41 @@ def remove_obsolete(cr):
         """.format(OBSOLETE_RULES))
 
 
+@openupgrade.logging()
+def rename_utm(env):
+    """Handle crm.tracking.* -> utm.* renames.
+
+    This must be done in base because utm is a new module in v9, and crm
+    depends on it. This means that utm will not execute migration scripts
+    (because it's installed, not migrated), and crm migration scripts will
+    have all utm data already in place.
+
+    What we do here instead is to migrate minimal parts before utm
+    is even installed.
+    """
+    if openupgrade.table_exists(env.cr, "crm_tracking_campaign"):
+        openupgrade.rename_models(env.cr, [
+            ("crm.tracking.campaign", "utm.campaign"),
+            ("crm.tracking.medium", "utm.medium"),
+            ("crm.tracking.source", "utm.source"),
+        ])
+        openupgrade.rename_tables(env.cr, [
+            ("crm_tracking_campaign", "utm_campaign"),
+            ("crm_tracking_medium", "utm_medium"),
+            ("crm_tracking_source", "utm_source"),
+        ])
+        openupgrade.rename_xmlids(env.cr, [
+            ("crm.crm_medium_banner", "utm.utm_medium_banner"),
+            ("crm.crm_medium_direct", "utm.utm_medium_direct"),
+            ("crm.crm_medium_email", "utm.utm_medium_email"),
+            ("crm.crm_medium_phone", "utm.utm_medium_phone"),
+            ("crm.crm_medium_website", "utm.utm_medium_website"),
+            ("crm.crm_source_mailing", "utm.utm_source_mailing"),
+            ("crm.crm_source_newsletter", "utm.utm_source_newsletter"),
+            ("crm.crm_source_search_engine", "utm.utm_source_search_engine"),
+        ])
+
+
 def cleanup_modules(cr):
     """Don't report as missing these modules, as they are integrated in
     other modules."""
@@ -110,6 +145,19 @@ def switch_noupdate_flag(cr):
     )
 
 
+def propagate_currency_company(env):
+    openupgrade.add_fields(
+        env, [('company_id', 'res.currency.rate', 'res_currency_rate',
+               'many2one', False, 'base')],
+    )
+    openupgrade.logged_query(
+        env.cr, """
+        UPDATE res_currency_rate rcr SET company_id = rc.company_id
+        FROM res_currency rc WHERE rc.id = rcr.currency_id
+        """,
+    )
+
+
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     cr = env.cr
@@ -128,6 +176,8 @@ def migrate(env, version):
     map_res_partner_type(cr)
     migrate_translations(env.cr)
     switch_noupdate_flag(env.cr)
+    rename_utm(env)
+    propagate_currency_company(env)
 
 
 def pre_create_columns(cr):
