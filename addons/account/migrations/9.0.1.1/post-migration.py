@@ -310,6 +310,20 @@ def move_view_accounts(env):
     )
     openupgrade.logged_query(
         env.cr, """
+        UPDATE account_analytic_line
+        SET general_account_id = null
+        WHERE
+          ctid IN (
+            SELECT aal.id
+              FROM account_analytic_account aal
+                LEFT OUTER JOIN account_account aa
+                  ON aal.general_account_id = aa.id
+            WHERE aa.id IS NULL
+        )
+        """
+    )
+    openupgrade.logged_query(
+        env.cr, """
         DELETE FROM account_account
         WHERE %s = 'view'""", (AsIs(openupgrade.get_legacy_name('type')),)
     )
