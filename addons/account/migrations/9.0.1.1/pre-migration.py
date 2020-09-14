@@ -234,9 +234,9 @@ def remove_account_moves_from_special_periods(cr):
         UPDATE account_analytic_line
         SET general_account_id = null
         WHERE
-          ctid IN (
+          id IN (
             SELECT aal.id
-              FROM account_analytic_account aal
+              FROM account_analytic_line aal
                 LEFT OUTER JOIN account_account aa
                   ON aal.general_account_id = aa.id
             WHERE aa.id IS NULL
