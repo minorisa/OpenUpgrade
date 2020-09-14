@@ -229,6 +229,20 @@ def remove_account_moves_from_special_periods(cr):
     openupgrade.logged_query(cr, """
         ALTER TABLE account_move_line DISABLE TRIGGER ALL
     """)
+    openupgrade.logged_query(
+        cr, """
+        UPDATE account_analytic_line
+        SET general_account_id = null
+        WHERE
+          ctid IN (
+            SELECT aal.id
+              FROM account_analytic_account aal
+                LEFT OUTER JOIN account_account aa
+                  ON aal.general_account_id = aa.id
+            WHERE aa.id IS NULL
+        )
+        """
+    )
     openupgrade.logged_query(cr, """
         DELETE FROM account_move_line l
         USING account_period p, account_journal j
