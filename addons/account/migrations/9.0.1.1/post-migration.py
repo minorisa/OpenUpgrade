@@ -324,6 +324,11 @@ def move_view_accounts(env):
     )
     openupgrade.logged_query(
         env.cr, """
+        ALTER TABLE account_analytic_line
+        DROP CONSTRAINT account_analytic_line_general_account_id_fkey"""
+    )
+    openupgrade.logged_query(
+        env.cr, """
         DELETE FROM account_account
         WHERE %s = 'view'""", (AsIs(openupgrade.get_legacy_name('type')),)
     )
