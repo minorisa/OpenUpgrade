@@ -313,11 +313,17 @@ def move_view_accounts(env):
         ALTER TABLE account_analytic_line
         DROP CONSTRAINT account_analytic_line_general_account_id_fkey"""
     )
+    openupgrade.logged_query(env.cr, """
+        ALTER TABLE account_account DISABLE TRIGGER ALL
+    """)
     openupgrade.logged_query(
         env.cr, """
         DELETE FROM account_account
         WHERE %s = 'view'""", (AsIs(openupgrade.get_legacy_name('type')),)
     )
+    openupgrade.logged_query(env.cr, """
+        ALTER TABLE account_account ENABLE TRIGGER ALL
+    """)
     # Remove constraint also on templates
     openupgrade.logged_query(
         env.cr, """
