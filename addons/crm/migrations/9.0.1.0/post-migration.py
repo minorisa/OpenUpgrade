@@ -58,7 +58,7 @@ def assign_crm_activity(env):
 @openupgrade.migrate()
 def migrate(cr, version):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    migrate_phonecalls(env)
+    # migrate_phonecalls(env)
     assign_crm_activity(env)
     openupgrade.load_data(
         cr, 'crm', 'migrations/9.0.1.0/noupdate_changes.xml',
