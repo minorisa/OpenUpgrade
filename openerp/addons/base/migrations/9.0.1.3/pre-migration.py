@@ -158,6 +158,20 @@ def propagate_currency_company(env):
     )
 
 
+def set_commercial_partner_id(env):
+    openupgrade.logged_query(
+        env.cr, """
+        UPDATE res_partner 
+        SET commercial_partner_id  = (
+            CASE WHEN parent_id IS NOT NULL THEN parent_id 
+                 ELSE id
+            END
+        )
+        WHERE commercial_partner_id IS NULL
+        """
+    )
+
+
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     cr = env.cr
@@ -178,6 +192,7 @@ def migrate(env, version):
     switch_noupdate_flag(env.cr)
     rename_utm(env)
     propagate_currency_company(env)
+    set_commercial_partner_id(env)
 
 
 def pre_create_columns(cr):
