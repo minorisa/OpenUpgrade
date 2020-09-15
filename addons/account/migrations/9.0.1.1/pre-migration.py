@@ -402,6 +402,20 @@ def fast_create(env, settings):
         env.cr.execute(sql_request)
 
 
+def set_commercial_partner_id(env):
+    openupgrade.logged_query(
+        env.cr, """
+        UPDATE res_partner 
+        SET commercial_partner_id  = (
+            CASE WHEN parent_id IS NOT NULL THEN parent_id 
+                 ELSE id
+            END
+        )
+        WHERE commercial_partner_id IS NULL
+        """
+    )
+
+
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     cr = env.cr
@@ -441,6 +455,7 @@ def migrate(env, version):
     merge_supplier_invoice_refs(env)
     openupgrade.rename_fields(env, field_renames)
     set_date_maturity(env)
+    set_commercial_partner_id(env)
 
     # Fast Create new fields
     fast_create(env, FAST_CREATIONS)
