@@ -16,6 +16,11 @@ _column_renames = {
     ],
 }
 
+_field_renames = [
+    # for preserving filters et al that have the same meaning
+    ('crm.lead', 'crm_lead', 'opt_out', 'is_blacklisted'),
+]
+
 _xml_ids_renames = [
     ('crm.action_crm_tag_form_view_oppor11',
      'crm.crm_lead_opportunities_view_form'),
@@ -66,5 +71,6 @@ def identify_act_window_views(env):
 def migrate(env, version):
     openupgrade.copy_columns(env.cr, column_copies)
     openupgrade.rename_columns(env.cr, _column_renames)
+    openupgrade.rename_fields(env, _field_renames)
     openupgrade.rename_xmlids(env.cr, _xml_ids_renames)
     identify_act_window_views(env)
