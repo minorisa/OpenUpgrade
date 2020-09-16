@@ -15,12 +15,16 @@ renamed_modules = {
     'partner_financial_risk': 'account_financial_risk',
     'partner_payment_return_risk': 'account_payment_return_financial_risk',
     'partner_sale_risk': 'sale_financial_risk',
+    'partner_stock_risk': 'stock_financial_risk',
     # OCA/crm
     'crm_sector': 'crm_industry',
     # OCA/account-payment
     'account_due_list_aging_comments': 'account_due_list_aging_comment',
+    # OCA/l10n-netherlands:
+    'l10n_nl_intrastat': 'l10n_nl_tax_statement_icp',
     # OCA/partner-contact
     'partner_sector': 'partner_industry_secondary',
+    'partner_street_number': 'base_address_extended',
     # OCA/product-attribute
     'product_uom': 'product_uom_extra_data',  # -> OCA/community-data-files
     # OCA/purchase-workflow
@@ -81,6 +85,10 @@ merged_modules = {
     'crm_lead_website': 'crm',
     # OCA/hr-timesheet
     'hr_timesheet_sheet_week_start_day': 'hr_timesheet_sheet',
+    # OCA/l10n-italy:
+    'l10n_it_fiscalcode_invoice': 'l10n_it_fiscalcode',
+    # OCA/l10n-spain:
+    'l10n_es_account_group': 'l10n_es',
     # OCA/product-variant
     'product_variant_supplierinfo': 'product',
     'sale_stock_variant_configurator': 'sale_variant_configurator',
@@ -109,6 +117,9 @@ merged_modules = {
     'web_widget_domain_v11': 'web',
     # OCA/website
     'website_seo_redirection': 'website',
+    # OCA/bank-statement-import
+    'account_bank_statement_import_camt':
+    'account_bank_statement_import_camt_oca',
 }
 
 renamed_models = {

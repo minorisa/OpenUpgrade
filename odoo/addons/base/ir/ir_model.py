@@ -298,7 +298,13 @@ class IrModel(models.Model):
         cr.execute('SELECT * FROM ir_model WHERE state=%s', ['manual'])
         for model_data in cr.dictfetchall():
             model_class = self._instanciate(model_data)
-            model_class._build_model(self.pool, cr)
+            Model = model_class._build_model(self.pool, cr)
+            if tools.table_kind(cr, Model._table) not in ('r', None):
+                # not a regular table, so disable schema upgrades
+                Model._auto = False
+                cr.execute('SELECT * FROM %s LIMIT 0' % Model._table)
+                columns = {desc[0] for desc in cr.description}
+                Model._log_access = set(models.LOG_ACCESS_COLUMNS) <= columns
 
 
 # retrieve field types defined by the framework only (not extensions)
@@ -543,12 +549,16 @@ class IrModelFields(models.Model):
             )
             continue
             model = self.env[field.model]
-            if tools.column_exists(self._cr, model._table, field.name) and \
-                    tools.table_kind(self._cr, model._table) == 'r':
-                self._cr.execute('ALTER TABLE "%s" DROP COLUMN "%s" CASCADE' % (model._table, field.name))
-            if field.state == 'manual' and field.ttype == 'many2many':
-                rel_name = field.relation_table or model._fields[field.name].relation
-                tables_to_drop.add(rel_name)
+            if field.store:
+                # TODO: Refactor this brol in master
+                if tools.column_exists(self._cr, model._table, field.name) and \
+                        tools.table_kind(self._cr, model._table) == 'r':
+                    self._cr.execute('ALTER TABLE "%s" DROP COLUMN "%s" CASCADE' % (
+                        model._table, field.name,
+                    ))
+                if field.state == 'manual' and field.ttype == 'many2many':
+                    rel_name = field.relation_table or model._fields[field.name].relation
+                    tables_to_drop.add(rel_name)
             if field.state == 'manual':
                 model._pop_field(field.name)
 
@@ -963,9 +973,12 @@ class IrModelFields(models.Model):
         fields_data = self._get_manual_field_data(model._name)
         for name, field_data in fields_data.items():
             if name not in model._fields and field_data['state'] == 'manual':
-                field = self._instanciate(field_data)
-                if field:
-                    model._add_field(name, field)
+                try:
+                    field = self._instanciate(field_data)
+                    if field:
+                        model._add_field(name, field)
+                except Exception:
+                    _logger.exception("Failed to load field %s.%s: skipped", model._name, field_data['name'])
 
 
 class IrModelConstraint(models.Model):
@@ -1274,7 +1287,7 @@ class IrModelAccess(models.Model):
             else:
                 msg_tail = _("Please contact your system administrator if you think this is an error.") + "\n\n(" + _("Document model") + ": %s)"
                 msg_params = (model,)
-            msg_tail += ' - ({} {}, {} {})'.format(_('Operation:'), mode, _('User:'), self._uid)
+            msg_tail += u' - ({} {}, {} {})'.format(_('Operation:'), mode, _('User:'), self._uid)
             _logger.info('Access Denied by ACLs for operation: %s, uid: %s, model: %s', mode, self._uid, model)
             msg = '%s %s' % (msg_heads[mode], msg_tail)
             raise AccessError(msg % msg_params)
@@ -1708,20 +1721,23 @@ class IrModelData(models.Model):
         for (id, name, model, res_id, module) in self._cr.fetchall():
             if (module, name) not in self.loads:
                 if model in self.env:
-                    # OpenUpgrade: never break on unlink of obsolete records
                     _logger.info('Deleting %s@%s (%s.%s)', res_id, model, module, name)
-                    try:
-                        self.env.cr.execute('SAVEPOINT ir_model_data_delete');
-                        self.env[model].browse(res_id).unlink()
-                        self.env.cr.execute('RELEASE SAVEPOINT ir_model_data_delete')
-                    except Exception:
-                        self.env.cr.execute('ROLLBACK TO SAVEPOINT ir_model_data_delete');
-                        _logger.warning(
-                            'Could not delete obsolete record with id: %d of model %s\n'
-                            'Please refer to the log message right above',
-                            res_id, model)
+                    record = self.env[model].browse(res_id)
+                    if record.exists():
+                        # OpenUpgrade: never break on unlink of obsolete records
+                        try:
+                            self.env.cr.execute('SAVEPOINT ir_model_data_delete');
+                            record.unlink()
+                            self.env.cr.execute('RELEASE SAVEPOINT ir_model_data_delete')
+                        except Exception:
+                            self.env.cr.execute('ROLLBACK TO SAVEPOINT ir_model_data_delete');
+                            _logger.warning(
+                                'Could not delete obsolete record with id: %d of model %s\n'
+                                'Please refer to the log message right above',
+                                res_id, model)
+                        # /OpenUpgrade
+                    else:
                         bad_imd_ids.append(id)
-                    # /OpenUpgrade
         if bad_imd_ids:
             self.browse(bad_imd_ids).unlink()
         self.loads.clear()

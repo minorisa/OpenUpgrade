@@ -1431,9 +1431,9 @@ exports.Orderline = Backbone.Model.extend({
             var unit = this.get_unit();
             if(unit){
                 if (unit.rounding) {
-                    this.quantity    = round_pr(quant, unit.rounding);
                     var decimals = this.pos.dp['Product Unit of Measure'];
-                    this.quantity = round_di(this.quantity, decimals)
+                    var rounding = Math.max(unit.rounding, Math.pow(10, -decimals));
+                    this.quantity    = round_pr(quant, rounding);
                     this.quantityStr = field_utils.format.float(this.quantity, {digits: [69, decimals]});
                 } else {
                     this.quantity    = round_pr(quant, 1);
@@ -2102,7 +2102,8 @@ exports.Order = Backbone.Model.extend({
             uid: this.uid,
             sequence_number: this.sequence_number,
             creation_date: this.validation_date || this.creation_date, // todo: rename creation_date in master
-            fiscal_position_id: this.fiscal_position ? this.fiscal_position.id : false
+            fiscal_position_id: this.fiscal_position ? this.fiscal_position.id : false,
+            to_invoice: this.to_invoice ? this.to_invoice : false,
         };
     },
     export_for_printing: function(){

@@ -8,13 +8,9 @@ from odoo.addons.openupgrade_records.lib import apriori
 from openupgradelib import openupgrade
 
 
-# backup of
-# - datetime field because it changes to date field
-column_copies = {
-    'res_currency_rate': [('name', None, None)],
-}
 column_renames = {
     'ir_actions': [('usage', None)],
+    'res_currency_rate': [('name', None)],
 }
 
 
@@ -23,6 +19,39 @@ column_renames = {
 model_renames_ir_actions_report = [
     ('ir.actions.report.xml', 'ir.actions.report')
 ]
+
+_obsolete_tables = (
+    "base_action_rule",
+    "base_action_rule_lead_test",
+    "base_action_rule_line_test",
+    "crm_activity",
+    "hr_timesheet_sheet_sheet",
+    "ir_values",
+    "marketing_campaign",
+    "marketing_campaign_activity",
+    "marketing_campaign_segment",
+    "marketing_campaign_transition",
+    "marketing_campaign_workitem",
+    "procurement_order",
+    "project_issue",
+    "report",
+    "res_font",
+    "stock_move_lots",
+    "stock_move_operation_link",
+    "stock_pack_operation",
+    "stock_pack_operation_lot",
+    "stock_picking_wave",
+    "subscription_document",
+    "subscription_document_fields",
+    "subscription_subscription",
+    "subscription_subscription_history",
+    "wkf",
+    "wkf_activity",
+    "wkf_instance",
+    "wkf_transition",
+    "wkf_triggers",
+    "wkf_workitem",
+)
 
 
 def handle_partner_sector(env):
@@ -61,14 +90,61 @@ def fill_cron_action_server_pre(env):
     )
 
 
+def set_currency_rate_dates(env):
+    """Set currency rate date by creation user timezone."""
+    openupgrade.logged_query(
+        env.cr,
+        "ALTER TABLE res_currency_rate ADD COLUMN name DATE")
+    cr = env.cr
+    openupgrade.logged_query(
+        cr, """
+        UPDATE res_currency_rate rcr
+        SET name = (%s::TIMESTAMP at TIME ZONE 'UTC'
+            AT TIME ZONE COALESCE(rp.tz, 'UTC'))::DATE
+        FROM res_users ru
+        JOIN res_partner rp ON ru.partner_id = rp.id
+        WHERE rcr.create_uid = ru.id
+        """, (
+            AsIs(openupgrade.get_legacy_name('name')),
+        ),
+    )
+    # Now delete duplicated currency rates due to 'unique_name_per_day'
+    # sql constrain and name type changed from datetime to date"""
+    openupgrade.logged_query(
+        cr, """
+        DELETE FROM res_currency_rate
+        WHERE id IN (
+            SELECT id
+            FROM (
+                SELECT id, row_number() over (partition BY name, currency_id,
+                    company_id ORDER BY id) AS rnum
+                FROM res_currency_rate
+            ) t
+            WHERE t.rnum > 1)"""
+    )
+
+
+def rename_mass_mailing_event(env):
+    env.cr.execute("""
+        SELECT id
+        FROM ir_module_module
+        WHERE name = 'mass_mailing_event' AND state <> 'uninstalled'""")
+    row = env.cr.fetchone()
+    if row:
+        openupgrade.update_module_names(
+            env.cr,
+            [("mass_mailing_event", "mass_mailing_event_registration_exclude")],
+            merge_modules=True)
+
+
 @openupgrade.migrate()
 def migrate(env, version):
+    openupgrade.remove_tables_fks(env.cr, _obsolete_tables)
     openupgrade.update_module_names(
         env.cr, apriori.renamed_modules.items()
     )
     openupgrade.update_module_names(
         env.cr, apriori.merged_modules.items(), merge_modules=True)
-    openupgrade.copy_columns(env.cr, column_copies)
     openupgrade.rename_columns(env.cr, column_renames)
     openupgrade.rename_models(env.cr, model_renames_ir_actions_report)
     handle_partner_sector(env)
@@ -102,3 +178,10 @@ def migrate(env, version):
         UPDATE ir_cron SET interval_type = 'days'
         WHERE interval_type = 'work_days'""")
     fill_cron_action_server_pre(env)
+    openupgrade.set_xml_ids_noupdate_value(
+        env, 'base', ['lang_km'], True)
+    set_currency_rate_dates(env)
+
+    # Rename 'mass_mailing_event' module to not collide with the new
+    # core module with the same name.
+    rename_mass_mailing_event(env)

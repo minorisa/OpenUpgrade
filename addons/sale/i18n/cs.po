@@ -8,7 +8,7 @@
 # Ladislav Tomm <tomm@helemik.cz>, 2018
 # Martin Trigaux, 2018
 # Michal Veselý <michal@veselyberanek.net>, 2018
-# trendspotter <j.podhorecky@volny.cz>, 2019
+# trendspotter <j.podhorecky@volny.cz>, 2020
 # 
 msgid ""
 msgstr ""
@@ -16,7 +16,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-01-03 15:07+0000\n"
 "PO-Revision-Date: 2017-09-20 10:23+0000\n"
-"Last-Translator: trendspotter <j.podhorecky@volny.cz>, 2019\n"
+"Last-Translator: trendspotter <j.podhorecky@volny.cz>, 2020\n"
 "Language-Team: Czech (https://www.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -440,7 +440,7 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_order_page
 msgid "Accept &amp; Sign"
-msgstr ""
+msgstr "Přijmout a podepsat"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_advance_payment_inv_deposit_account_id
@@ -947,7 +947,7 @@ msgstr "Předplatba"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv_amount
 msgid "Down Payment Amount"
-msgstr ""
+msgstr "Částka zálohy"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv_product_id
@@ -973,7 +973,7 @@ msgstr "Předplatba (procentem)"
 #: code:addons/sale/wizard/sale_make_invoice_advance.py:82
 #, python-format
 msgid "Down payment of %s%%"
-msgstr ""
+msgstr "Záloha ve výši %s%%"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line_is_downpayment
@@ -981,6 +981,8 @@ msgid ""
 "Down payments are made when creating invoices from a sales order. They are "
 "not copied when duplicating a sales order."
 msgstr ""
+"Zálohy se provádějí při vytváření faktur z prodejní objednávky. Při "
+"kopírování prodejní objednávky nejsou kopírovány."
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_order_page
@@ -1030,6 +1032,9 @@ msgid ""
 "customer. The search tool can also be used to personalise your Invoices "
 "reports and so, match this analysis to your needs."
 msgstr ""
+"Z tohoto přehledu získáte přehled fakturované částky zákazníkovi. "
+"Vyhledávací nástroj lze také použít k přizpůsobení vašich přehledů faktur, a"
+" tak přizpůsobit tuto analýzu vašim potřebám."
 
 #. module: sale
 #: selection:sale.order,invoice_status:0
@@ -1284,12 +1289,12 @@ msgstr "Invoicing and Shipping Address:"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line_is_downpayment
 msgid "Is a down payment"
-msgstr ""
+msgstr "Je záloha"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_is_expired
 msgid "Is expired"
-msgstr ""
+msgstr "vypršela platnost"
 
 #. module: sale
 #: code:addons/sale/models/sale.py:864
@@ -1298,12 +1303,14 @@ msgid ""
 "It is forbidden to modify the following fields in a locked order:\n"
 "%s"
 msgstr ""
+"Je zakázáno měnit následující pole v uzamčené objednávce:\n"
+"%s"
 
 #. module: sale
 #: code:addons/sale/models/sale.py:551
 #, python-format
 msgid "It is not allowed to confirm an order in the following states: %s"
-msgstr ""
+msgstr "Není dovoleno potvrzovat objednávku v následujících stavech: %s"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_report_all_channels_sales___last_update
@@ -1502,7 +1509,7 @@ msgstr "Počet dnů mezi potvrzením objednávky a odesláním zboží zákazní
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_crm_team_quotations_count
 msgid "Number of quotations to invoice"
-msgstr ""
+msgstr "Počet nabídek na fakturu"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_crm_team_sales_to_invoice_count
@@ -1610,7 +1617,7 @@ msgstr ""
 #: code:addons/sale/controllers/portal.py:225
 #, python-format
 msgid "Order signed by %s"
-msgstr ""
+msgstr "Objednávka podepsána od %s"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.crm_team_salesteams_view_kanban
@@ -1620,7 +1627,7 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.view_order_form
 msgid "Ordered Qty"
-msgstr ""
+msgstr "Objednané množství"
 
 #. module: sale
 #: code:addons/sale/models/sale.py:841
@@ -1694,7 +1701,7 @@ msgstr "Kontakt"
 #: model:ir.model.fields,field_description:sale.field_report_all_channels_sales_country_id
 #: model:ir.model.fields,field_description:sale.field_sale_report_country_id
 msgid "Partner Country"
-msgstr ""
+msgstr "Země partnera"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.view_order_product_search
@@ -1720,7 +1727,7 @@ msgstr ""
 #: code:addons/sale/models/sale.py:353
 #, python-format
 msgid "Please define an accounting sales journal for this company."
-msgstr ""
+msgstr "Definujte prosím účetní deník pro tuto společnost."
 
 #. module: sale
 #: code:addons/sale/models/sale.py:949
@@ -1738,7 +1745,7 @@ msgstr "Snížená cena"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line_price_reduce_taxexcl
 msgid "Price Reduce Tax excl"
-msgstr ""
+msgstr "Snížení ceny bez DPH"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line_price_reduce_taxinc
@@ -2169,7 +2176,7 @@ msgstr "Prodejní cena"
 #: code:addons/sale/models/sales_team.py:94
 #, python-format
 msgid "Sales: Untaxed Total"
-msgstr ""
+msgstr "Tržby: celkem bez daně"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_report_all_channels_sales_user_id
@@ -2231,7 +2238,7 @@ msgstr "Prodej a nákup produktů v různých měrných jednotkách"
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Sell products by multiple of unit # per package"
-msgstr ""
+msgstr "Prodej produktů v násobcích jednotek, počet za balení"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.view_order_form
@@ -2292,6 +2299,8 @@ msgstr "Nastavit více cen za produkt, automatizované slevy atd."
 #: model:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Set product attributes (e.g. color, size) to sell variants"
 msgstr ""
+"Chcete-li prodávat varianty, nastavte atributy produktu (např. Barvu, "
+"velikost)"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -2465,7 +2474,7 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings_sale_note
 msgid "Terms & Conditions"
-msgstr ""
+msgstr "Všeobecné obchodní podmínky"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_note
@@ -2513,6 +2522,8 @@ msgid ""
 "The margin is computed as the sum of product sales prices minus the cost set"
 " in their detail form."
 msgstr ""
+"Marže se počítá jako součet prodejních cen produktu snížený o náklady "
+"stanovené v jejich podrobné podobě."
 
 #. module: sale
 #: code:addons/sale/wizard/sale_make_invoice_advance.py:151
@@ -2749,7 +2760,7 @@ msgstr "Nezdaněný součet"
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.sale_order_view_search_inherit_sale
 msgid "Upselling"
-msgstr ""
+msgstr "Vzestupný"
 
 #. module: sale
 #: selection:sale.order,invoice_status:0

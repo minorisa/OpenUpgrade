@@ -126,12 +126,12 @@ msgstr "Med"
 #. module: lunch
 #: model:ir.ui.view,arch_db:lunch.view_lunch_alert_kanban
 msgid "Between:"
-msgstr ""
+msgstr "Med:"
 
 #. module: lunch
 #: model:ir.ui.view,arch_db:lunch.lunch_cashmove_view_search_2
 msgid "By Employee"
-msgstr "Po zaposlenih"
+msgstr "Po kadru"
 
 #. module: lunch
 #: model:ir.ui.view,arch_db:lunch.lunch_order_line_view_search
@@ -311,7 +311,7 @@ msgstr "Ne prezrite obvestil, izpisanih v rdečkastem polju"
 #. module: lunch
 #: model:ir.ui.menu,name:lunch.lunch_cashmove_menu_payment
 msgid "Employee Payments"
-msgstr "Plačila zaposlenih"
+msgstr "Plačila kadrom"
 
 #. module: lunch
 #: model:ir.model.fields,help:lunch.field_lunch_order_line_lucky_is_max_budget
@@ -391,13 +391,13 @@ msgstr ""
 #. module: lunch
 #: model:ir.ui.view,arch_db:lunch.view_lunch_order_line_lucky
 msgid "I'm feeling lucky"
-msgstr ""
+msgstr "Počutim se srečno"
 
 #. module: lunch
 #: model:ir.actions.act_window,name:lunch.action_lunch_order_line_lucky
 #: model:ir.ui.view,arch_db:lunch.view_lunch_order_line_lucky
 msgid "I'm feeling lucky today !"
-msgstr ""
+msgstr "Danes se počutim srečno !"
 
 #. module: lunch
 #: model:ir.model.fields,field_description:lunch.field_lunch_order_line_lucky_is_max_budget
@@ -932,7 +932,7 @@ msgstr "gotovinska transakcija za prehrano"
 #. module: lunch
 #: model:ir.ui.view,arch_db:lunch.lunch_cashmove_view_search
 msgid "lunch employee payment"
-msgstr "plačilo obroka"
+msgstr "plačilo malice"
 
 #. module: lunch
 #: model:ir.model,name:lunch.model_lunch_order_line

@@ -214,6 +214,7 @@
     <field name="currency_unit_label">Dinar</field>
   </record>
   <record model="res.currency" id="BHD">
+    <field name="rounding">0.001</field>
     <field name="currency_subunit_label">Fils</field>
     <field name="currency_unit_label">Dinar</field>
   </record>
@@ -262,6 +263,7 @@
     <field name="vat_label">VAT</field>
   </record>
   <record model="res.currency" id="JOD">
+    <field name="rounding">0.001</field>
     <field name="currency_subunit_label">Fils</field>
     <field name="currency_unit_label">Dinar</field>
   </record>
@@ -398,6 +400,7 @@
     <field name="currency_unit_label">Lira</field>
   </record>
   <record model="res.currency" id="OMR">
+    <field name="rounding">0.001</field>
     <field name="currency_subunit_label">Baisa</field>
     <field name="currency_unit_label">Rial</field>
   </record>
@@ -465,6 +468,7 @@
     <field name="currency_unit_label">Balboa</field>
   </record>
   <record model="res.currency" id="TZS">
+    <field name="symbol">TSh</field>
     <field name="currency_subunit_label">Senti</field>
     <field name="currency_unit_label">Shilling</field>
   </record>
@@ -693,7 +697,8 @@
     <field name="currency_unit_label">Ringgit</field>
   </record>
   <record model="res.currency" id="LYD">
-    <field name="currency_subunit_label">Centimes</field>
+    <field name="rounding">0.001</field>
+    <field name="currency_subunit_label">Dirham</field>
     <field name="currency_unit_label">Dinar</field>
   </record>
   <record model="res.currency" id="HKD">
@@ -723,6 +728,7 @@
     <field name="currency_subunit_label">Centimes</field>
   </record>
   <record model="res.currency" id="IQD">
+    <field name="rounding">0.001</field>
     <field name="currency_subunit_label">Fils</field>
     <field name="currency_unit_label">Dinar</field>
   </record>
@@ -844,6 +850,7 @@
     <field name="position">before</field>
   </record>
   <record model="res.currency" id="TND">
+    <field name="rounding">0.001</field>
     <field name="currency_subunit_label">Millimes</field>
     <field name="currency_unit_label">Dinar</field>
   </record>
@@ -874,5 +881,8 @@
   <record id="gt" model="res.country">
     <field name="currency_id" ref="GTQ"/>
     <field name="vat_label">NIT</field>
+  </record>
+  <record id="mr" model="res.country">
+    <field name="currency_id" ref="MRU"/>
   </record>
 </odoo>

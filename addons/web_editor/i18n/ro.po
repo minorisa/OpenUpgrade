@@ -257,14 +257,14 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:95
 #, python-format
 msgid "Center"
-msgstr ""
+msgstr "Centru"
 
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets/widgets.js:55
 #, python-format
 msgid "Change media description and tooltip"
-msgstr ""
+msgstr "Schimbarea descriere media și sfatul"
 
 #. module: web_editor
 #. openerp-web
@@ -708,6 +708,8 @@ msgid ""
 "If you discard the current edition, all unsaved changes will be lost. You "
 "can cancel to return to the edition mode."
 msgstr ""
+"Dacă renunțați la editarea curentă, toate modificările nesalvate vor fi "
+"pierdute. Puteți anula pentru a reveni la modul editare."
 
 #. module: web_editor
 #. openerp-web
@@ -1412,7 +1414,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/editor.xml:40
 #, python-format
 msgid "Tooltip"
-msgstr ""
+msgstr "Sfat"
 
 #. module: web_editor
 #. openerp-web

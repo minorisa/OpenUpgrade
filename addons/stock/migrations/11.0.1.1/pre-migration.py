@@ -37,17 +37,6 @@ def delete_quants_for_consumable(env):
     )
 
 
-def drop_slow_constraint(env):
-    """Removing this constraint, that doesn't affect new data structure, as
-    it belongs to an obsolete model, we get tons of more performance on
-    quant removal.
-    """
-    openupgrade.logged_query(
-        env.cr, "ALTER TABLE stock_move_operation_link DROP CONSTRAINT "
-                "stock_move_operation_link_reserved_quant_id_fkey",
-    )
-
-
 def fix_act_window(env):
     """Action window with XML-ID 'stock.action_procurement_compute' has
     set src_model='procurement.order', and this will provoke an error as
@@ -70,7 +59,6 @@ def fix_act_window(env):
 def migrate(env, version):
     copy_global_rules(env)
     delete_quants_for_consumable(env)
-    drop_slow_constraint(env)
     fix_act_window(env)
     openupgrade.update_module_moved_fields(
         env.cr, 'stock.move', ['has_tracking'], 'mrp', 'stock',
@@ -101,3 +89,10 @@ def migrate(env, version):
              'stock'),
         ],
     )
+    openupgrade.set_xml_ids_noupdate_value(
+        env, 'stock', [
+            'barcode_rule_location',
+            'barcode_rule_lot',
+            'barcode_rule_package',
+            'barcode_rule_weight_three_dec',
+        ], True)

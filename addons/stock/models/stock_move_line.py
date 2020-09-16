@@ -71,6 +71,12 @@ class StockMoveLine(models.Model):
     def _compute_product_qty(self):
         self.product_qty = self.product_uom_id._compute_quantity(self.product_uom_qty, self.product_id.uom_id, rounding_method='HALF-UP')
 
+    @api.constrains('lot_id', 'product_id')
+    def _check_lot_product(self):
+        for line in self:
+            if line.lot_id and line.product_id != line.lot_id.sudo().product_id:
+                raise ValidationError(_('This lot %s is incompatible with this product %s' % (line.lot_id.name, line.product_id.display_name)))
+
     @api.one
     def _set_product_qty(self):
         """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
@@ -212,6 +218,9 @@ class StockMoveLine(models.Model):
         """
         if self.env.context.get('bypass_reservation_update'):
             return super(StockMoveLine, self).write(vals)
+
+        if 'product_id' in vals and any(vals.get('state', ml.state) != 'draft' and vals['product_id'] != ml.product_id.id for ml in self):
+            raise UserError(_("Changing the product is only allowed in 'Draft' state."))
 
         Quant = self.env['stock.quant']
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
@@ -423,8 +432,9 @@ class StockMoveLine(models.Model):
                 rounding = ml.product_uom_id.rounding
 
                 # if this move line is force assigned, unreserve elsewhere if needed
-                if not ml.location_id.should_bypass_reservation() and float_compare(ml.qty_done, ml.product_qty, precision_rounding=rounding) > 0:
-                    extra_qty = ml.qty_done - ml.product_qty
+                if not ml.location_id.should_bypass_reservation() and float_compare(ml.qty_done, ml.product_uom_qty, precision_rounding=rounding) > 0:
+                    qty_done_product_uom = ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id, rounding_method='HALF-UP')
+                    extra_qty = qty_done_product_uom - ml.product_qty
                     ml._free_reservation(ml.product_id, ml.location_id, extra_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, ml_to_ignore=done_ml)
                 # unreserve what's been reserved
                 if not ml.location_id.should_bypass_reservation() and ml.product_id.type == 'product' and ml.product_qty:

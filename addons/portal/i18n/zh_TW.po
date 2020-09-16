@@ -91,6 +91,13 @@ msgid "<span id=\"search_label\">Search</span> <span class=\"caret\"/>"
 msgstr "<span id=\"search_label\">搜尋</span><span class=\"caret\"/>"
 
 #. module: portal
+#. openerp-web
+#: code:addons/portal/static/src/xml/portal_signature.xml:24
+#, python-format
+msgid "Accept and Sign"
+msgstr ""
+
+#. module: portal
 #: model:ir.ui.view,arch_db:portal.wizard_view
 msgid "Apply"
 msgstr "應用"
@@ -277,7 +284,7 @@ msgstr "登陸使用者"
 #. module: portal
 #: model:ir.ui.view,arch_db:portal.frontend_layout
 msgid "Logout"
-msgstr "註銷"
+msgstr "登出"
 
 #. module: portal
 #: model:ir.model,name:portal.model_mail_message
