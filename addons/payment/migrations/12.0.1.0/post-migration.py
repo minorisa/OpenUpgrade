@@ -68,7 +68,7 @@ def migrate(env, version):
     map_payment_transaction_state(cr)
     fill_payment_transaction_is_processed(cr)
     fill_payment_transaction_payment_id(cr)
-    fill_invoice_ids(env)
+    # fill_invoice_ids(env)
     fill_missing_acquirers_journals(env)
     openupgrade.load_data(
         cr, 'payment', 'migrations/12.0.1.0/noupdate_changes.xml')
