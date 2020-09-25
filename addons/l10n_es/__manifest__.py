@@ -1,39 +1,42 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-# Copyright (c) 2008-2010 Zikzakmedia S.L. (http://zikzakmedia.com) All Rights Reserved.
-#                         Jordi Esteve <jesteve@zikzakmedia.com>
-# Copyright (c) 2012-2013, Grupo OPENTIA (<http://opentia.com>) Registered EU Trademark.
-#                         Dpto. Consultoría <consultoria@opentia.es>
-# Copyright (c) 2013 Serv. Tecnol. Avanzados (http://www.serviciosbaeza.com)
-#                    Pedro Manuel Baeza <pedro.baeza@serviciosbaeza.com>
+# © 2008-2010 Jordi Esteve - Zikzakmedia S.L.
+# © 2011-2018 Ignacio - Ibeas - Acysos
+# © 2012-2013 Grupo Opentia
+# © 2014 Pablo Cayuela - Aserti Global Solutions
+# © 2014 Ángel Moya - Domatix
+# © 2015 Carlos Liébana - Factor Libre
+# © 2015 Albert Cabedo - GAFIC consultores
+# © 2013-2018 Tecnativa - Pedro M. Baeza
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
-    "name" : "Spain - Accounting (PGCE 2008)",
-    "version" : "4.0",
-    "author" : "Spanish Localization Team",
-    'website' : 'https://launchpad.net/openerp-spain',
-    'category': 'Localization',
-    "description": """
-Spanish charts of accounts (PGCE 2008).
-========================================
-
-    * Defines the following chart of account templates:
-        * Spanish general chart of accounts 2008
-        * Spanish general chart of accounts 2008 for small and medium companies
-        * Spanish general chart of accounts 2008 for associations
-    * Defines templates for sale and purchase VAT
-    * Defines tax code templates
-    * Defines fiscal positions for spanish fiscal legislation
-""",
-    "depends" : ["account", "base_vat", "base_iban"],
-    "data" : [
-        'data/account_account_type_data.xml',
-        'data/l10n_es_chart_data.xml',
-        'data/account_account_template_data.xml',
-        'data/account_tax_data.xml',
-        'data/account_fiscal_position_template_data.xml',
-        'data/account_chart_template_data.xml',
-        'data/account_chart_template_data.yml',
+    "name": "Planes de cuentas españoles (según PGCE 2008)",
+    "version": "10.0.2.0.0",
+    "author": "Spanish Localization Team, "
+              "Odoo Community Association (OCA)",
+    "website": 'https://github.com/OCA/l10n-spain',
+    "category": "Localization/Account Charts",
+    "license": "AGPL-3",
+    "depends": [
+        "account",
+        "base_vat",
+        "base_iban",
+    ],
+    "data": [
+        "data/account_type.xml",
+        "data/account_chart_template.xml",
+        "data/account_account_common.xml",
+        "data/account_account_full.xml",
+        "data/account_account_pymes.xml",
+        "data/account_account_assoc.xml",
+        "data/account_tax_group_data.xml",
+        "data/taxes_common.xml",
+        "data/fiscal_positions_common.xml",
+        "data/account_chart_template_post.xml",
+    ],
+    'installable': True,
+    'images': [
+        'images/config_chart_l10n_es.png',
+        'images/l10n_es_chart.png'
     ],
 }
