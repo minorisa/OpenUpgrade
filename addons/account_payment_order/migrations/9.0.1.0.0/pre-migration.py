@@ -160,7 +160,7 @@ def migrate(env, version):
         # openupgrade.rename_columns(env.cr, column_renames_payment_export)
         migrate_payment_mode_types(env)
 
-    if openupgrade.is_module_installed(
+    if False and openupgrade.is_module_installed(
             env.cr, 'account_banking_payment_transfer'):
         openupgrade.rename_columns(env.cr, column_renames_payment_transfer)
         openupgrade.update_module_names(
