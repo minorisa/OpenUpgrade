@@ -75,6 +75,13 @@ def handle_account_asset_disposal_migration(env):
 @openupgrade.migrate()
 def migrate(env, version):
     cr = env.cr
+
+    openupgrade.logged_query(cr, """
+    UPDATE account_invoice_line
+    SET asset_id = null
+    WHERE asset_id = 0
+    """)
+
     if openupgrade.table_exists(cr, 'account_asset_asset'):
         # `account_asset` module was installed in v11
         if openupgrade.table_exists(cr, 'account_asset'):
