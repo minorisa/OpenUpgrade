@@ -136,6 +136,6 @@ def set_voucher_line_amount(env):
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     """Control function for account_voucher migration."""
-    create_payments_from_vouchers(env)
-    create_voucher_line_tax_lines(env)
-    set_voucher_line_amount(env)
+    # create_payments_from_vouchers(env)
+    # create_voucher_line_tax_lines(env)
+    # set_voucher_line_amount(env)
