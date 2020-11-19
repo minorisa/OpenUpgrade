@@ -503,6 +503,12 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         for package in graph:
             migrations.migrate_module(package, 'end')
 
+        # STEP 3.6: warn about missing NOT NULL constraints
+        for (table, column), err_msg in registry._notnull_errors.items():
+            msg = "Table %r: column %r: unable to set constraint NOT NULL\n%s"
+            _logger.warning(msg, table, column, err_msg)
+        registry._notnull_errors.clear()
+
         # STEP 4: Finish and cleanup installations
         if processed_modules:
             env = api.Environment(cr, SUPERUSER_ID, {})
@@ -587,6 +593,10 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
             _logger.info('Modules loaded.')
 
         # STEP 8: call _register_hook on every model
+        # This is done *exactly once* when the registry is being loaded. See the
+        # management of those hooks in `Registry.setup_models`: all the calls to
+        # setup_models() done here do not mess up with hooks, as registry.ready
+        # is False.
         env = api.Environment(cr, SUPERUSER_ID, {})
         for model in env.values():
             model._register_hook()
