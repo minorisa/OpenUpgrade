@@ -983,9 +983,9 @@ class AccountTax(models.Model):
 
             tax_amount = tax._compute_amount(base, price_unit, quantity, product, partner)
             if not round_tax:
-                tax_amount = round(tax_amount, prec)
+                tax_amount = round(tax_amount or 0.0, prec)
             else:
-                tax_amount = currency.round(tax_amount)
+                tax_amount = currency.round(tax_amount or 0.0)
 
             if tax.price_include:
                 total_excluded -= tax_amount
