@@ -17,3 +17,9 @@ _field_renames = [
 def migrate(env, version):
     openupgrade.copy_columns(env.cr, column_copies)
     openupgrade.rename_fields(env, _field_renames)
+
+    openupgrade.logged_query(
+        env.cr, """
+        DROP TABLE IF EXIST account_invoice_payment_rel
+        """
+    )
