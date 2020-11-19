@@ -20,6 +20,6 @@ def migrate(env, version):
 
     openupgrade.logged_query(
         env.cr, """
-        DROP TABLE IF EXIST account_invoice_payment_rel
+        DROP TABLE IF EXISTS account_invoice_payment_rel
         """
     )
