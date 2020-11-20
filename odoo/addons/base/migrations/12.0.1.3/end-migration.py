@@ -141,7 +141,7 @@ def migrate_account_pro_agreement(cr):
 
 
 def create_split_supplier_payment_modes(env):
-    ptype = env["account.payment.type"].search([
+    pmethod = env["account.payment.method"].search([
         ("payment_type", "=", "outgoing")
     ], limit=1)
     partners = env["res.partner"].search([])
@@ -151,7 +151,7 @@ def create_split_supplier_payment_modes(env):
         if mode:
             mapping[mode] = mode.copy({
                 "name": "[From Supplier Migration] " + mode.name,
-                "payment_method_id": ptype.id,
+                "payment_method_id": pmethod.id,
             })
     for partner in env["res.partner"].search([
                 ("supplier_payment_mode_id", "!=", False)
