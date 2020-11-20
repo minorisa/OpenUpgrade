@@ -121,6 +121,25 @@ def fill_res_users_password_from_password_crypt(cr):
     )
 
 
+def migrate_account_pro_agreement(cr):
+    openupgrade.rename_tables(cr, [
+        ('account_periodical_invoicing_agreement',
+         'account_pro_agreement'),
+        ('account_periodical_invoicing_agreement_invoice',
+         'account_pro_agreement_invoice'),
+        ('account_periodical_invoicing_agreement_line',
+         'account_pro_agreement_line'),
+        ('account_periodical_invoicing_agreement_renewal',
+         'account_pro_agreement_renewal'),
+    ])
+    openupgrade.rename_columns(cr, {
+        'account_pro_agreement_line': [
+            ('account_analytic_id', 'analytic_id'),
+            ('preu_compra', 'purchase_price'),
+        ]
+    })
+
+
 @openupgrade.migrate()
 def migrate(env, version):
     openupgrade.disable_invalid_filters(env)
@@ -128,3 +147,5 @@ def migrate(env, version):
     fork_off_system_user(env)
     if openupgrade.column_exists(env.cr, 'res_users', 'password_crypt'):
         fill_res_users_password_from_password_crypt(env.cr)
+
+    migrate_account_pro_agreement(env.cr)
