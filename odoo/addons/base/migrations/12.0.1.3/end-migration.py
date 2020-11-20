@@ -140,6 +140,21 @@ def migrate_account_pro_agreement(cr):
     })
 
 
+def create_split_supplier_payment_modes(env):
+    modes = env["res.partner"].mapped("supplier_payment_mode_id")
+    mapping = {}
+    for mode in modes:
+        if mode:
+            mapping[mode] = mode.copy({
+                "name": "[From Supplier Migration] " + mode.name,
+            })
+    for partner in env["res.partner"].search([
+                ("supplier_payment_mode_id", "!=", False)
+            ]):
+        partner.supplier_payment_mode_id = mapping[
+            partner.supplier_payment_mode_id]
+
+
 @openupgrade.migrate()
 def migrate(env, version):
     openupgrade.disable_invalid_filters(env)
@@ -149,3 +164,4 @@ def migrate(env, version):
         fill_res_users_password_from_password_crypt(env.cr)
 
     migrate_account_pro_agreement(env.cr)
+    create_split_supplier_payment_modes(env)
