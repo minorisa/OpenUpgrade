@@ -142,7 +142,7 @@ def migrate_account_pro_agreement(cr):
 
 def create_split_supplier_payment_modes(env):
     pmethod = env["account.payment.method"].search([
-        ("payment_type", "=", "outgoing")
+        ("payment_type", "=", "outbound")
     ], limit=1)
     partners = env["res.partner"].search([])
     modes = partners.mapped("supplier_payment_mode_id")
