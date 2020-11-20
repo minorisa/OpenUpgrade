@@ -141,7 +141,7 @@ def migrate_account_pro_agreement(cr):
 
 
 def create_split_supplier_payment_modes(env):
-    modes = env["res.partner"].mapped("supplier_payment_mode_id")
+    modes = env["res.partner"].search[()].mapped("supplier_payment_mode_id")
     mapping = {}
     for mode in modes:
         if mode:
