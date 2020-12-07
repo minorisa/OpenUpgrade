@@ -992,9 +992,9 @@
     <record id="LVL" model="res.currency">
       <field name="active" eval="False"/>
     </record>
-    <record id="res_partner_title_sir" model="res.partner.title">
-      <field name="shortcut">Sr.</field>
-    </record>
+<!--    <record id="res_partner_title_sir" model="res.partner.title">-->
+<!--      <field name="shortcut">Sr.</field>-->
+<!--    </record>-->
     <record id="ARS" model="res.currency">
       <field name="active" eval="False"/>
     </record>
