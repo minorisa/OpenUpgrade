@@ -454,6 +454,7 @@
       <field eval="856" name="phone_code"/>
     </record>
     <record id="res_bank_1" model="res.bank">
+      <field name="name">Dumb</field>
       <field name="active" eval="False"/>
     </record>
     <record id="lk" model="res.country">
