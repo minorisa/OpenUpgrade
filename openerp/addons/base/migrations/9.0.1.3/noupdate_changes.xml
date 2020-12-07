@@ -567,8 +567,8 @@
     <record id="AFN" model="res.currency">
       <field name="active" eval="False"/>
     </record>
-    <record id="res_partner_title_miss" model="res.partner.title">
-    </record>
+<!--    <record id="res_partner_title_miss" model="res.partner.title">-->
+<!--    </record>-->
     <record id="MGA" model="res.currency">
       <field name="active" eval="False"/>
     </record>
