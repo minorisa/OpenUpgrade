@@ -59,6 +59,7 @@
       <field name="email_from">${(object.user_id.email and '%s &lt;%s&gt;' % (object.user_id.name, object.user_id.email) or '')|safe}</field>
     </record>
     <record id="account_payment_term_immediate" model="account.payment.term">
+      <field name="name">Immediate</field>
       <field name="note">Payment term: Immediate Payment</field>
     </record>
     <record id="sequence_reconcile_seq" model="ir.sequence">
