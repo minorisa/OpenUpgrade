@@ -146,10 +146,11 @@ def migrate(env, version):
     openupgrade.set_xml_ids_noupdate_value(
         env, 'account', ['account_analytic_line_rule_billing_user'], False)
 
-    openupgrade.logged_query(
-        cr, """
-        UPDATE account_invoice_line
-        SET asset_id = NULL
-        WHERE asset_id = 0
-        """
-    )
+    if openupgrade.column_exists(env.cr, 'account_invoice_line', 'asset_id'):
+        openupgrade.logged_query(
+            cr, """
+            UPDATE account_invoice_line
+            SET asset_id = NULL
+            WHERE asset_id = 0
+            """
+        )
