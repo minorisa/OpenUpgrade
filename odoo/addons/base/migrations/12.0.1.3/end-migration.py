@@ -168,5 +168,7 @@ def migrate(env, version):
     if openupgrade.column_exists(env.cr, 'res_users', 'password_crypt'):
         fill_res_users_password_from_password_crypt(env.cr)
 
-    migrate_account_pro_agreement(env.cr)
+    if openupgrade.table_exists(
+            env.cr, 'account_periodical_invoicing_agreement'):
+        migrate_account_pro_agreement(env.cr)
     create_split_supplier_payment_modes(env)
