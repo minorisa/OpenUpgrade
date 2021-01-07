@@ -145,19 +145,22 @@ def create_split_supplier_payment_modes(env):
         ("payment_type", "=", "outbound")
     ], limit=1)
     partners = env["res.partner"].search([])
-    modes = partners.mapped("supplier_payment_mode_id")
-    mapping = {}
-    for mode in modes:
-        if mode:
-            mapping[mode] = mode.copy({
-                "name": "[From Supplier Migration] " + mode.name,
-                "payment_method_id": pmethod.id,
-            })
-    for partner in env["res.partner"].search([
-                ("supplier_payment_mode_id", "!=", False)
-            ]):
-        partner.supplier_payment_mode_id = mapping[
-            partner.supplier_payment_mode_id]
+    try:
+        modes = partners.mapped("supplier_payment_mode_id")
+        mapping = {}
+        for mode in modes:
+            if mode:
+                mapping[mode] = mode.copy({
+                    "name": "[From Supplier Migration] " + mode.name,
+                    "payment_method_id": pmethod.id,
+                })
+        for partner in env["res.partner"].search([
+                    ("supplier_payment_mode_id", "!=", False)
+                ]):
+            partner.supplier_payment_mode_id = mapping[
+                partner.supplier_payment_mode_id]
+    except Exception:
+        pass
 
 
 @openupgrade.migrate()
