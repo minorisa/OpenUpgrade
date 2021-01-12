@@ -1,7 +1,7 @@
 # © 2018 Opener B.V. (stefan@opener.amsterdam)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from openupgradelib import openupgrade, openupgrade_merge_records
-
+from datetime import date
 
 def update_model_terms_translations(env):
     """ Adapt to changes in https://github.com/odoo/odoo/pull/26925, that
@@ -295,8 +295,8 @@ def migrate_bu_auxiliary_aal(env):
     ])
     for aml in amls:
         oaal.create({
-            'name': aml.name,
-            'date': aml.date,
+            'name': aml.name or ' ',
+            'date': aml.date or date.today(),
             'account_id': aml.analytic_account_id.id,
             'amount': round(aml.debit - aml.credit, 2),
             'ref': aml.ref,
