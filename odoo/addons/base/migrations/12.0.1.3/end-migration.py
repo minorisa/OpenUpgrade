@@ -304,7 +304,6 @@ def migrate_bu_auxiliary_aal(env):
         })
 
 
-
 @openupgrade.migrate()
 def migrate(env, version):
     openupgrade.disable_invalid_filters(env)
@@ -321,3 +320,4 @@ def migrate(env, version):
             env.cr, 'account_unitat_negoci'):
         migrate_bu_auxiliary_aml(env)
         migrate_bu_auxiliary_ail(env)
+        migrate_bu_auxiliary_aal(env)
