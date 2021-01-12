@@ -299,5 +299,9 @@ def migrate(env, version):
     create_split_supplier_payment_modes(env)
     if openupgrade.table_exists(
             env.cr, 'account_unitat_negoci'):
+        openupgrade.logged_query(env.cr, """
+        ALTER TABLE account_analytic_account
+        ADD COLUMN IF NOT EXISTS parent_id INT
+        """)
         migrate_bu_auxiliary_aml(env)
         migrate_bu_auxiliary_ail(env)
