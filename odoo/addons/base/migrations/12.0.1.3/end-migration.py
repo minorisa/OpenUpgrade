@@ -285,6 +285,26 @@ def migrate_bu_auxiliary_ail(env):
         inv_line.account_analytic_id = na or ta or un
 
 
+def migrate_bu_auxiliary_aal(env):
+    oaal = env["account.analytic.line"]
+    amls = env["account.move.line"].search([
+        ('analytic_account_id', '!=', False),
+        '|',
+        ('debit', '>', 0),
+        ('credit', '>', 0),
+    ])
+    for aml in amls:
+        oaal.create({
+            'name': aml.name,
+            'date': aml.date,
+            'account_id': aml.analytic_account_id.id,
+            'amount': round(aml.debit - aml.credit, 2),
+            'ref': aml.ref,
+            'general_account_id': aml.account_id.id,
+        })
+
+
+
 @openupgrade.migrate()
 def migrate(env, version):
     openupgrade.disable_invalid_filters(env)
@@ -299,9 +319,5 @@ def migrate(env, version):
     create_split_supplier_payment_modes(env)
     if openupgrade.table_exists(
             env.cr, 'account_unitat_negoci'):
-        openupgrade.logged_query(env.cr, """
-        ALTER TABLE account_analytic_account
-        ADD COLUMN IF NOT EXISTS parent_id INT
-        """)
         migrate_bu_auxiliary_aml(env)
         migrate_bu_auxiliary_ail(env)
