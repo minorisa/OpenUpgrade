@@ -245,7 +245,7 @@ def migrate_bu_auxiliary_ail(env):
         LEFT JOIN account_unitat_negoci un ON ail.unitat_negoci_id = un.id
         LEFT JOIN account_numero_auxiliar na ON ail.numero_auxiliar_id = na.id
         LEFT JOIN account_tipus_auxiliar ta ON ail.tipus_auxiliar_id = ta.id
-        LEFT JOIN account_account aa ON aml.account_id = aa.id
+        LEFT JOIN account_account aa ON ail.account_id = aa.id
     WHERE LEFT(aa.code, 1) IN ('6', '7')
     """)
     for ail in env.cr.dictfetchall():
