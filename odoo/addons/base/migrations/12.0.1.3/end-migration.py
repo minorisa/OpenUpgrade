@@ -310,6 +310,82 @@ def migrate_bu_auxiliary_aal(env):
         })
 
 
+def migrate_bu_auxiliary(env):
+    oaaa = env["account.analytic.account"]
+    oaml = env["account.move.line"]
+    oaal = env["account.analytic.line"]
+    env.cr.execute("""
+    SELECT aml.id AS id,
+           aml.unitat_negoci_id,
+           un.name AS un_name,
+           un.code AS un_code,
+           aml.numero_auxiliar_id,
+           na.name AS na_name,
+           na.code AS na_code,
+           aml.tipus_auxiliar_id,
+           ta.name AS ta_name,
+           ta.code AS ta_code,
+           aml.name AS aml_name,
+           aml.date AS aml_date,
+           aml.debit AS aml_debit,
+           aml.credit AS aml_credit,
+           aml.ref AS aml_ref,
+           aml.account_id AS aml_account_id
+    FROM account_move_line aml
+        LEFT JOIN account_unitat_negoci un ON aml.unitat_negoci_id = un.id
+        LEFT JOIN account_numero_auxiliar na ON aml.numero_auxiliar_id = na.id
+        LEFT JOIN account_tipus_auxiliar ta ON aml.tipus_auxiliar_id = ta.id
+        LEFT JOIN account_account aa ON aml.account_id = aa.id
+    WHERE aa.code IS NOT NULL AND LEFT(aa.code, 1) IN ('6', '7')
+    """)
+    for aml in env.cr.dictfetchall():
+        na = ta = un = None
+        if aml.get('na_code'):
+            na = oaaa.search([
+                ('code', '=', aml.get('na_code')),
+            ], limit=1)
+            if not na:
+                na = oaaa.create({
+                    'name': aml.get('na_name'),
+                    'code': aml.get('na_code'),
+                })
+
+        if aml.get('ta_code'):
+            ta = oaaa.search([
+                ('code', '=', aml.get('ta_code')),
+            ], limit=1)
+            if not ta:
+                ta = oaaa.create({
+                    'name': aml.get('ta_name'),
+                    'code': aml.get('ta_code'),
+                })
+            if na and not na.parent_id:
+                na.parent_id = ta
+
+        if aml.get('un_code'):
+            un = oaaa.search([
+                ('code', '=', aml.get('un_code')),
+            ], limit=1)
+            if not un:
+                un = oaaa.create({
+                    'name': aml.get('un_name'),
+                    'code': aml.get('un_code'),
+                })
+            if ta and not ta.parent_id:
+                ta.parent_id = un
+
+        analytic_account_id = na or ta or un
+        oaal.create({
+            'name': aml.get('aml_name', ' '),
+            'date': aml.get('aml_date', date.today().isoformat()),
+            'account_id': analytic_account_id.id,
+            'amount': round(aml.get('debit', 0) - aml.get('credit', 0), 2),
+            'ref': aml.get('ref'),
+            'general_account_id': aml.get('aml_account_id'),
+            'move_id': aml.get('id'),
+        })
+
+
 @openupgrade.migrate()
 def migrate(env, version):
     openupgrade.disable_invalid_filters(env)
@@ -324,6 +400,7 @@ def migrate(env, version):
     create_split_supplier_payment_modes(env)
     if openupgrade.table_exists(
             env.cr, 'account_unitat_negoci'):
-        migrate_bu_auxiliary_aml(env)
-        migrate_bu_auxiliary_ail(env)
-        migrate_bu_auxiliary_aal(env)
+        # migrate_bu_auxiliary_aml(env)
+        # migrate_bu_auxiliary_ail(env)
+        # migrate_bu_auxiliary_aal(env)
+        migrate_bu_auxiliary(env)
