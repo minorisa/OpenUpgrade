@@ -380,7 +380,7 @@ def migrate_bu_auxiliary(env):
                 'name': aml.get('aml_name', ' ') or ' ',
                 'date': aml.get('aml_date', date.today().isoformat()),
                 'account_id': analytic_account_id.id,
-                'amount': round(aml.get('debit', 0) - aml.get('credit', 0), 2),
+                'amount': round(aml.get('debit', 0) or 0 - aml.get('credit', 0) or 0, 2),
                 'ref': aml.get('ref'),
                 'general_account_id': aml.get('aml_account_id'),
                 'move_id': aml.get('id'),
