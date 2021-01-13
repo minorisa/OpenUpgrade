@@ -375,15 +375,16 @@ def migrate_bu_auxiliary(env):
                 ta.parent_id = un
 
         analytic_account_id = na or ta or un
-        oaal.create({
-            'name': aml.get('aml_name', ' '),
-            'date': aml.get('aml_date', date.today().isoformat()),
-            'account_id': analytic_account_id.id,
-            'amount': round(aml.get('debit', 0) - aml.get('credit', 0), 2),
-            'ref': aml.get('ref'),
-            'general_account_id': aml.get('aml_account_id'),
-            'move_id': aml.get('id'),
-        })
+        if analytic_account_id:
+            oaal.create({
+                'name': aml.get('aml_name', ' '),
+                'date': aml.get('aml_date', date.today().isoformat()),
+                'account_id': analytic_account_id.id,
+                'amount': round(aml.get('debit', 0) - aml.get('credit', 0), 2),
+                'ref': aml.get('ref'),
+                'general_account_id': aml.get('aml_account_id'),
+                'move_id': aml.get('id'),
+            })
 
 
 @openupgrade.migrate()
