@@ -377,7 +377,7 @@ def migrate_bu_auxiliary(env):
         analytic_account_id = na or ta or un
         if analytic_account_id:
             oaal.create({
-                'name': aml.get('aml_name', ' '),
+                'name': aml.get('aml_name', ' ') or ' ',
                 'date': aml.get('aml_date', date.today().isoformat()),
                 'account_id': analytic_account_id.id,
                 'amount': round(aml.get('debit', 0) - aml.get('credit', 0), 2),
