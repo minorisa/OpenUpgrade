@@ -182,6 +182,8 @@ def migrate_bu_auxiliary_aml(env):
         LEFT JOIN account_unitat_negoci un ON aml.unitat_negoci_id = un.id
         LEFT JOIN account_numero_auxiliar na ON aml.numero_auxiliar_id = na.id
         LEFT JOIN account_tipus_auxiliar ta ON aml.tipus_auxiliar_id = ta.id
+        LEFT JOIN account_account aa ON aml.account_id = aa.id
+    WHERE LEFT(aa.code, 1) IN ('6', '7')
     """)
     for aml in env.cr.dictfetchall():
         na = ta = un = None
@@ -243,6 +245,8 @@ def migrate_bu_auxiliary_ail(env):
         LEFT JOIN account_unitat_negoci un ON ail.unitat_negoci_id = un.id
         LEFT JOIN account_numero_auxiliar na ON ail.numero_auxiliar_id = na.id
         LEFT JOIN account_tipus_auxiliar ta ON ail.tipus_auxiliar_id = ta.id
+        LEFT JOIN account_account aa ON aml.account_id = aa.id
+    WHERE LEFT(aa.code, 1) IN ('6', '7')
     """)
     for ail in env.cr.dictfetchall():
         na = ta = un = None
@@ -292,8 +296,9 @@ def migrate_bu_auxiliary_aal(env):
         '|',
         ('debit', '>', 0),
         ('credit', '>', 0),
+        ()
     ])
-    for aml in amls:
+    for aml in amls.filtered(lambda x: x.account_id.code[:1] in ('6', '7')):
         oaal.create({
             'name': aml.name or ' ',
             'date': aml.date or date.today(),
@@ -301,6 +306,7 @@ def migrate_bu_auxiliary_aal(env):
             'amount': round(aml.debit - aml.credit, 2),
             'ref': aml.ref,
             'general_account_id': aml.account_id.id,
+            'move_id': aml.id,
         })
 
 
