@@ -1,7 +1,11 @@
 # © 2018 Opener B.V. (stefan@opener.amsterdam)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+import logging
 from openupgradelib import openupgrade, openupgrade_merge_records
 from datetime import date
+
+_logger = logging.getLogger(__name__)
+
 
 def update_model_terms_translations(env):
     """ Adapt to changes in https://github.com/odoo/odoo/pull/26925, that
@@ -216,6 +220,8 @@ def migrate_bu_auxiliary(env):
             })
             map_na[na_id] = a.id
 
+        _logger.info(map_na)
+        _logger.info(na_id)
         oaal.create({
             "name": line.get("aml_name") or " ",
             "date": line.get("aml_date") or date.today().isoformat(),
