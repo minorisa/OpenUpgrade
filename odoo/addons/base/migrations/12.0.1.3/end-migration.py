@@ -255,13 +255,13 @@ def migrate_bu_auxiliary(env):
                 "tag_ids": [(4, un)] if un else [],
             })
         # update invoice line
-        if aml.get("aml_move_id"):
+        if na and aml.get("aml_move_id"):
             env.cr.execute("""
             UPDATE account_invoice_line
             SET account_analytic_id = %s
             WHERE id = %s
             """, (
-                map_na[aml.get("aml_id")],
+                na,
                 aml.get("aml_move_id"),
             ))
         if un and aml.get("aml_move_id"):
