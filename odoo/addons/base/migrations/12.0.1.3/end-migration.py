@@ -265,14 +265,17 @@ def migrate_bu_auxiliary(env):
                 aml.get("aml_move_id"),
             ))
         if un and aml.get("aml_move_id"):
-            env.cr.execute("""
-            INSERT INTO account_analytic_tag_account_invoice_line_rel
-            (account_invoice_line_id, account_analytic_tag_id)
-            VALUES (%s, %s)            
-            """, (
-                aml.get("aml_move_id"),
-                un,
-            ))
+            try:
+                env.cr.execute("""
+                INSERT INTO account_analytic_tag_account_invoice_line_rel
+                (account_invoice_line_id, account_analytic_tag_id)
+                VALUES (%s, %s)            
+                """, (
+                    aml.get("aml_move_id"),
+                    un,
+                ))
+            except Exception:
+                pass
 
 
 @openupgrade.migrate()
