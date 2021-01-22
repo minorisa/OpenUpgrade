@@ -276,8 +276,6 @@ def migrate_bu_auxiliary(env):
                     ail.id,
                     un,
                 ))
-            except Exception:
-                pass
 
 
 @openupgrade.migrate()
