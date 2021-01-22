@@ -178,8 +178,8 @@ def migrate_bu_auxiliary(env):
         ana.id AS na_id,
         aml.name AS aml_name,
         aml.date AS aml_date,
-        aml.debit AS aml_debit,
-        aml.credit AS aml_credit,
+        aml.amount AS ROUND(
+            COALESCE(aml.debit, 0) - COALESCE(aml.credit, 0), 2) AS aml_amount,
         aml.ref AS aml_ref,
         aml.account_id AS aml_account_id,
         aml.partner_id AS aml_partner_id
@@ -221,8 +221,7 @@ def migrate_bu_auxiliary(env):
             "name": line.get("aml_name") or " ",
             "date": line.get("aml_date") or date.today().isoformat(),
             "account_id": map_na[na_id],
-            "amount": round(
-                line.get("aml_debit", 0) - line.get("aml_credit", 0), 2),
+            "amount": line.get("aml_amount"),
             "ref": line.get("ref"),
             "general_account_id": line.get("aml_account_id"),
             "move_id": line.get("id"),
