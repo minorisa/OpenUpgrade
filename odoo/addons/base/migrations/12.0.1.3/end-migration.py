@@ -168,69 +168,108 @@ def create_split_supplier_payment_modes(env):
 
 
 def migrate_bu_auxiliary(env):
+    # BU -> Etiquetes analitiques
+    # TA/NA -> Grup i compte analitic
+
     oaag = env["account.analytic.group"]
+    oaat = env["account.analytic.tag"]
     oaaa = env["account.analytic.account"]
     oaal = env["account.analytic.line"]
+
+    # account_unitat_negoci
+    env.cr.execute("""
+    SELECT id, name, company_id
+    FROM account_unitat_negoci
+    """)
+    map_bu = {}
+    for line in env.cr.dictfetchall():
+        bu = oaat.create({
+            "name": line.get("name") or "GENERAL",
+            "company_id": line.get("company_id"),
+        })
+        map_bu[line.get("id")] = bu.id
+
+    # account_tipus_auxiliar
+    env.cr.execute("""
+    SELECT id, name, company_id
+    FROM account_tipus_auxiliar
+    """)
+    map_ta = {}
+    for line in env.cr.dictfetchall():
+        ta = oaag.create({
+            "name": line.get("name") or "GENERAL",
+            "company_id": line.get("company_id"),
+        })
+        map_ta[line.get("id")] = ta.id
+
+    # account_numero_auxiliar
+    env.cr.execute("""
+    SELECT id, tipus_auxiliar_id, name, company_id
+    FROM account_numero_auxiliar
+    """)
+    map_na = {}
+    for line in env.cr.dictfetchall():
+        na = oaaa.create({
+            "code": line.get("name") or "GENERAL",
+            "name": line.get("name") or "GENERAL",
+            "company_id": line.get("company_id"),
+            "group_id": map_ta[line.get("tipus_auxiliar_id")]
+        })
+        map_na[line.get("id")] = na.id
+
+    # Create analytic lines & update invoice lines
     env.cr.execute("""
     SELECT
-        aml.id AS id,
-        aun.name AS un,
-        aun.id AS un_id,
-        ata.name AS ta,
-        ata.id AS ta_id,
-        ana.name AS na,
-        ana.id AS na_id,
+        aml.id AS aml_id,
         aml.name AS aml_name,
         aml.date AS aml_date,
-        ROUND(COALESCE(aml.debit, 0) - COALESCE(aml.credit, 0), 2) AS aml_amount,
+        ROUND(COALESCE(aml.debit, 0) - COALESCE(aml.credit, 0), 2) AS amount,
         aml.ref AS aml_ref,
         aml.account_id AS aml_account_id,
-        aml.partner_id AS aml_partner_id
-    FROM account_move_line aml 
-        LEFT JOIN account_account aa ON aml.account_id = aa.id
-        LEFT JOIN account_unitat_negoci aun ON aml.unitat_negoci_id = aun.id
-        LEFT JOIN account_tipus_auxiliar ata ON aml.tipus_auxiliar_id = ata.id
-        LEFT JOIN account_numero_auxiliar ana
-            ON aml.numero_auxiliar_id = ana.id  
+        aml.partner_id AS aml_partner_id,
+        aml.numero_auxiliar_id AS aml_numero_auxiliar_id,
+        aml.unitat_negoci_id AS aml_unitat_negoci_id,
+        aml.move_id AS aml_move_id,
+        ail.product_id AS ail_product_id,
+        ail.uom_id AS ail_uom_id
+    FROM account_move_line aml
+        LEFT JOIN account_invoice_line ail ON aml.move_id = ail.id
+    WHERE aml.numero_auxiliar_id IS NOT NULL or aml.unitat_negoci_id IS NOT NULL
     """)
-    map_bu = map_ta = map_na = {}
-    for line in env.cr.dictfetchall():
-        un_id = line.get("un_id") or 999999999
-        ta_id = line.get("ta_id") or 999999999
-        na_id = line.get("na_id") or 999999999
-
-        if un_id not in map_bu:
-            g = oaag.create({
-                "name": line.get("un") or "GENERAL",
-            })
-            map_bu[un_id] = g.id
-
-        if ta_id not in map_ta:
-            g = oaag.create({
-                "name": line.get("ta") or "GENERAL",
-                "parent_id": map_bu[un_id]
-            })
-            map_ta[ta_id] = g.id
-
-        if na_id not in map_na:
-            a = oaaa.create({
-                "code": line.get("na") or "GENERAL",
-                "name": line.get("na") or "GENERAL",
-                "group_id": map_ta[ta_id],
-            })
-            map_na[na_id] = a.id
-
-        _logger.info(map_na)
-        _logger.info(na_id)
+    for aml in env.cr.dictfetchall():
+        # creat analytic line
+        un = map_bu.get(aml.get("aml_unitat_negoci_id"))
         oaal.create({
-            "name": line.get("aml_name") or " ",
-            "date": line.get("aml_date") or date.today().isoformat(),
-            "account_id": map_na[na_id],
-            "amount": line.get("aml_amount"),
-            "ref": line.get("ref"),
-            "general_account_id": line.get("aml_account_id"),
-            "move_id": line.get("id"),
+            "name": aml.get("aml_name") or " ",
+            "date": aml.get("aml_date"),
+            "account_id": map_na[aml.get("aml_id")],
+            "amount": aml.get("aml_amount"),
+            "ref": aml.get("aml_ref"),
+            "general_account_id": aml.get("aml_account_id"),
+            "move_id": aml.get("aml_id"),
+            "product_id": aml.get("ail_product_id"),
+            "product_uom_id": aml.get("ail_product_uom_id"),
+            "tag_ids": [(4, un)] if un else [],
         })
+        # update invoice line
+        if aml.get("aml_move_id"):
+            env.cr.execute("""
+            UPDATE account_invoice_line
+            SET account_analytic_id = %s
+            WHERE id = %s
+            """, (
+                map_na[aml.get("aml_id")],
+                aml.get("aml_move_id"),
+            ))
+        if un and aml.get("aml_move_id"):
+            env.cr.execute("""
+            INSERT INTO account_analytic_tag_account_invoice_line_rel
+            (account_invoice_line_id, account_analytic_tag_id)
+            VALUES (%s, %s)            
+            """, (
+                aml.get("aml_move_id"),
+                un,
+            ))
 
 
 @openupgrade.migrate()
