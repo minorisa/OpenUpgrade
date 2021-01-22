@@ -256,26 +256,26 @@ def migrate_bu_auxiliary(env):
                 "tag_ids": [(4, un)] if un else [],
             })
         # update invoice line
-        if na and aml.get("aml_move_id"):
-            env.cr.execute("""
-            UPDATE account_invoice_line
-            SET account_analytic_id = %s
-            WHERE id = %s
-            """, (
-                na,
-                aml.get("aml_move_id"),
-            ))
-        if un and aml.get("aml_move_id"):
-            ail = oail.browse(aml.get("aml_move_id"))
-            if ail:
-                env.cr.execute("""
-                INSERT INTO account_analytic_tag_account_invoice_line_rel
-                (account_invoice_line_id, account_analytic_tag_id)
-                VALUES (%s, %s)            
-                """, (
-                    ail.id,
-                    un,
-                ))
+        # if na and aml.get("aml_move_id"):
+        #     env.cr.execute("""
+        #     UPDATE account_invoice_line
+        #     SET account_analytic_id = %s
+        #     WHERE id = %s
+        #     """, (
+        #         na,
+        #         aml.get("aml_move_id"),
+        #     ))
+        # if un and aml.get("aml_move_id"):
+        #     ail = oail.browse(aml.get("aml_move_id"))
+        #     if ail:
+        #         env.cr.execute("""
+        #         INSERT INTO account_analytic_tag_account_invoice_line_rel
+        #         (account_invoice_line_id, account_analytic_tag_id)
+        #         VALUES (%s, %s)
+        #         """, (
+        #             ail.id,
+        #             un,
+        #         ))
 
 
 @openupgrade.migrate()
