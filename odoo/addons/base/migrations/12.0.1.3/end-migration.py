@@ -240,18 +240,20 @@ def migrate_bu_auxiliary(env):
         _logger.info(aml)
         # creat analytic line
         un = map_bu.get(aml.get("aml_unitat_negoci_id"))
-        oaal.create({
-            "name": aml.get("aml_name") or " ",
-            "date": aml.get("aml_date"),
-            "account_id": map_na.get(aml.get("aml_numero_auxiliar_id")),
-            "amount": aml.get("aml_amount"),
-            "ref": aml.get("aml_ref"),
-            "general_account_id": aml.get("aml_account_id"),
-            "move_id": aml.get("aml_id"),
-            "product_id": aml.get("ail_product_id"),
-            "product_uom_id": aml.get("ail_product_uom_id"),
-            "tag_ids": [(4, un)] if un else [],
-        })
+        na = map_na.get(aml.get("aml_numero_auxiliar_id"))
+        if na:
+            oaal.create({
+                "name": aml.get("aml_name") or " ",
+                "date": aml.get("aml_date"),
+                "account_id": na,
+                "amount": aml.get("aml_amount"),
+                "ref": aml.get("aml_ref"),
+                "general_account_id": aml.get("aml_account_id"),
+                "move_id": aml.get("aml_id"),
+                "product_id": aml.get("ail_product_id"),
+                "product_uom_id": aml.get("ail_product_uom_id"),
+                "tag_ids": [(4, un)] if un else [],
+            })
         # update invoice line
         if aml.get("aml_move_id"):
             env.cr.execute("""
