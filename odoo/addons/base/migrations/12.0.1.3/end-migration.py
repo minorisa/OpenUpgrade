@@ -237,6 +237,7 @@ def migrate_bu_auxiliary(env):
     WHERE aml.numero_auxiliar_id IS NOT NULL or aml.unitat_negoci_id IS NOT NULL
     """)
     for aml in env.cr.dictfetchall():
+        _logger.info(aml)
         # creat analytic line
         un = map_bu.get(aml.get("aml_unitat_negoci_id"))
         oaal.create({
