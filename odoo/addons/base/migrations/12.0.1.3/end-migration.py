@@ -178,8 +178,7 @@ def migrate_bu_auxiliary(env):
         ana.id AS na_id,
         aml.name AS aml_name,
         aml.date AS aml_date,
-        aml.amount AS ROUND(
-            COALESCE(aml.debit, 0) - COALESCE(aml.credit, 0), 2) AS aml_amount,
+        ROUND(COALESCE(aml.debit, 0) - COALESCE(aml.credit, 0), 2) AS aml_amount,
         aml.ref AS aml_ref,
         aml.account_id AS aml_account_id,
         aml.partner_id AS aml_partner_id
