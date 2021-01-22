@@ -242,7 +242,7 @@ def migrate_bu_auxiliary(env):
         oaal.create({
             "name": aml.get("aml_name") or " ",
             "date": aml.get("aml_date"),
-            "account_id": map_na[aml.get("aml_id")],
+            "account_id": map_na.get(aml.get("aml_id")),
             "amount": aml.get("aml_amount"),
             "ref": aml.get("aml_ref"),
             "general_account_id": aml.get("aml_account_id"),
