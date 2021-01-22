@@ -250,7 +250,7 @@ def migrate_bu_auxiliary(env):
                 "amount": aml.get("aml_amount"),
                 "ref": aml.get("aml_ref"),
                 "general_account_id": aml.get("aml_account_id"),
-                "move_id": aml.get("aml_id"),
+                # "move_id": aml.get("aml_id"),
                 "product_id": aml.get("ail_product_id"),
                 "product_uom_id": aml.get("ail_product_uom_id"),
                 "tag_ids": [(4, un)] if un else [],
