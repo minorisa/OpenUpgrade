@@ -175,6 +175,7 @@ def migrate_bu_auxiliary(env):
     oaat = env["account.analytic.tag"]
     oaaa = env["account.analytic.account"]
     oaal = env["account.analytic.line"]
+    oail = env["account.invoice.line"]
 
     # account_unitat_negoci
     env.cr.execute("""
@@ -265,13 +266,14 @@ def migrate_bu_auxiliary(env):
                 aml.get("aml_move_id"),
             ))
         if un and aml.get("aml_move_id"):
-            try:
+            ail = oail.browse(aml.get("aml_move_id"))
+            if ail:
                 env.cr.execute("""
                 INSERT INTO account_analytic_tag_account_invoice_line_rel
                 (account_invoice_line_id, account_analytic_tag_id)
                 VALUES (%s, %s)            
                 """, (
-                    aml.get("aml_move_id"),
+                    ail.id,
                     un,
                 ))
             except Exception:
