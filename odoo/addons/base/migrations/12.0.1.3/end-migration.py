@@ -238,8 +238,8 @@ def migrate_bu_auxiliary(env):
     WHERE aml.numero_auxiliar_id IS NOT NULL or aml.unitat_negoci_id IS NOT NULL
     """)
     for aml in env.cr.dictfetchall():
-        _logger.info(aml)
-        # creat analytic line
+        # _logger.info(aml)
+        # create analytic line
         un = map_bu.get(aml.get("aml_unitat_negoci_id"))
         na = map_na.get(aml.get("aml_numero_auxiliar_id"))
         if na:
@@ -255,28 +255,24 @@ def migrate_bu_auxiliary(env):
                 "product_uom_id": aml.get("ail_product_uom_id"),
                 "tag_ids": [(4, un)] if un else [],
             })
-        # update invoice line
-        # if na and aml.get("aml_move_id"):
-        #     env.cr.execute("""
-        #     UPDATE account_invoice_line
-        #     SET account_analytic_id = %s
-        #     WHERE id = %s
-        #     """, (
-        #         na,
-        #         aml.get("aml_move_id"),
-        #     ))
-        # if un and aml.get("aml_move_id"):
-        #     ail = oail.browse(aml.get("aml_move_id"))
-        #     if ail:
-        #         env.cr.execute("""
-        #         INSERT INTO account_analytic_tag_account_invoice_line_rel
-        #         (account_invoice_line_id, account_analytic_tag_id)
-        #         VALUES (%s, %s)
-        #         """, (
-        #             ail.id,
-        #             un,
-        #         ))
-    # TODO iterate all ail if bu or na, update na or add analytic tag
+            env.cr.execute("""
+            UPDATE account_move_line
+            SET analytic_account_id = %s
+            WHERE id = %s
+            """, (
+                na,
+                aml.get("aml_id"),
+            ))
+        if un:
+            env.cr.execute("""
+            ISERT INTO account_analytic_tag_account_move_line_rel
+            (account_move_line_id, account_analytic_tag_id)
+            VALUES (%s, %s)
+            """, (
+                aml.get("aml_id"),
+                un,
+            ))
+
     env.cr.execute("""
     SELECT id, unitat_negoci_id, numero_auxiliar_id
     FROM account_invoice_line
