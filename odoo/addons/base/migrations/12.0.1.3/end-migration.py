@@ -280,7 +280,7 @@ def migrate_bu_auxiliary(env):
     env.cr.execute("""
     SELECT id, unitat_negoci_id, numero_auxiliar_id
     FROM account_invoice_line
-    WHERE unitat_negoci_id IS NOT NULL or numero auxiliar_id IS NOT NULL
+    WHERE unitat_negoci_id IS NOT NULL or numero_auxiliar_id IS NOT NULL
     """)
     for line in env.cr.dictfetchall():
         if line.get("unitat_negoci_id"):
