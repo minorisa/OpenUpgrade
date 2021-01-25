@@ -218,6 +218,12 @@ def migrate_bu_auxiliary(env):
         })
         map_na[line.get("id")] = na.id
 
+    # na general
+    na_gen = oaaa.create({
+        "code": "GENERAL",
+        "name": "GENERAL",
+    })
+
     # Create analytic lines & update invoice lines
     env.cr.execute("""
     SELECT
@@ -235,34 +241,34 @@ def migrate_bu_auxiliary(env):
         ail.uom_id AS ail_uom_id
     FROM account_move_line aml
         LEFT JOIN account_invoice_line ail ON aml.move_id = ail.id
-    WHERE aml.numero_auxiliar_id IS NOT NULL or aml.unitat_negoci_id IS NOT NULL
+        LEFT JOIN account_account aa ON aml.account_id = aa.id
+    WHERE LEFT(aa.code, 1) = '6' OR LEFT(aa.code, 1) = '7'
     """)
     for aml in env.cr.dictfetchall():
         # _logger.info(aml)
         # create analytic line
         un = map_bu.get(aml.get("aml_unitat_negoci_id"))
         na = map_na.get(aml.get("aml_numero_auxiliar_id"))
-        if na:
-            oaal.create({
-                "name": aml.get("aml_name") or " ",
-                "date": aml.get("aml_date"),
-                "account_id": na,
-                "amount": aml.get("aml_amount"),
-                "ref": aml.get("aml_ref"),
-                "general_account_id": aml.get("aml_account_id"),
-                "move_id": aml.get("aml_id"),
-                "product_id": aml.get("ail_product_id"),
-                "product_uom_id": aml.get("ail_product_uom_id"),
-                "tag_ids": [(4, un)] if un else [],
-            })
-            env.cr.execute("""
-            UPDATE account_move_line
-            SET analytic_account_id = %s
-            WHERE id = %s
-            """, (
-                na,
-                aml.get("aml_id"),
-            ))
+        oaal.create({
+            "name": aml.get("aml_name") or " ",
+            "date": aml.get("aml_date"),
+            "account_id": na or na_gen,
+            "amount": aml.get("aml_amount"),
+            "ref": aml.get("aml_ref"),
+            "general_account_id": aml.get("aml_account_id"),
+            "move_id": aml.get("aml_id"),
+            "product_id": aml.get("ail_product_id"),
+            "product_uom_id": aml.get("ail_product_uom_id"),
+            "tag_ids": [(4, un)] if un else [],
+        })
+        env.cr.execute("""
+        UPDATE account_move_line
+        SET analytic_account_id = %s
+        WHERE id = %s
+        """, (
+            na or na_gen,
+            aml.get("aml_id"),
+        ))
         if un:
             env.cr.execute("""
             INSERT INTO account_analytic_tag_account_move_line_rel
@@ -274,9 +280,10 @@ def migrate_bu_auxiliary(env):
             ))
 
     env.cr.execute("""
-    SELECT id, unitat_negoci_id, numero_auxiliar_id
-    FROM account_invoice_line
-    WHERE unitat_negoci_id IS NOT NULL or numero_auxiliar_id IS NOT NULL
+    SELECT ail.id, ail.unitat_negoci_id, ail.numero_auxiliar_id
+    FROM account_invoice_line ail
+    LEFT JOIN account_account aa ON ail.account_id = aa.id
+    WHERE LEFT(aa.code, 1) = '6' OR LEFT(aa.code, 1) = '7'
     """)
     for line in env.cr.dictfetchall():
         if line.get("unitat_negoci_id"):
@@ -288,15 +295,14 @@ def migrate_bu_auxiliary(env):
                 line.get("id"),
                 map_bu.get(line.get("unitat_negoci_id"))
             ))
-        if line.get("numero_auxiliar_id"):
-            env.cr.execute("""
-            UPDATE account_invoice_line
-            SET account_analytic_id = %s
-            WHERE id = %s
-            """, (
-                map_na.get(line.get("numero_auxiliar_id")),
-                line.get("id"),
-            ))
+        env.cr.execute("""
+        UPDATE account_invoice_line
+        SET account_analytic_id = %s
+        WHERE id = %s
+        """, (
+            map_na.get(line.get("numero_auxiliar_id")) or na_gen,
+            line.get("id"),
+        ))
 
 
 @openupgrade.migrate()
