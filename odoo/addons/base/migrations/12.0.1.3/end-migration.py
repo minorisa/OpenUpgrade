@@ -222,7 +222,7 @@ def migrate_bu_auxiliary(env):
     na_gen = oaaa.create({
         "code": "GENERAL",
         "name": "GENERAL",
-    })
+    }).id
 
     # Create analytic lines & update invoice lines
     env.cr.execute("""
