@@ -250,7 +250,7 @@ def migrate_bu_auxiliary(env):
                 "amount": aml.get("aml_amount"),
                 "ref": aml.get("aml_ref"),
                 "general_account_id": aml.get("aml_account_id"),
-                # "move_id": aml.get("aml_id"),
+                "move_id": aml.get("aml_id"),
                 "product_id": aml.get("ail_product_id"),
                 "product_uom_id": aml.get("ail_product_uom_id"),
                 "tag_ids": [(4, un)] if un else [],
@@ -276,6 +276,31 @@ def migrate_bu_auxiliary(env):
         #             ail.id,
         #             un,
         #         ))
+    # TODO iterate all ail if bu or na, update na or add analytic tag
+    env.cr.execute("""
+    SELECT id, unitat_negoci_id, numero_auxiliar_id
+    FROM account_invoice_line
+    WHERE unitat_negoci_id IS NOT NULL or numero auxiliar_id IS NOT NULL
+    """)
+    for line in env.cr.dictfetchall():
+        if line.get("unitat_negoci_id"):
+            env.cr.execute("""
+            INSERT INTO account_analytic_tag_account_invoice_line_rel
+            (account_invoice_line_id, account_analytic_tag_id)
+            VALUES (%s, %s)
+            """, (
+                line.get("id"),
+                map_bu.get(line.get("unitat_negoci_id"))
+            ))
+        if line.get("numero_auxiliar_id"):
+            env.cr.execute("""
+            UPDATE account_invoice_line
+            SET account_analytic_id = %s
+            WHERE id = %s
+            """, (
+                map_na.get(line.get("numero_auxiliar_id")),
+                line.get("id"),
+            ))
 
 
 @openupgrade.migrate()
