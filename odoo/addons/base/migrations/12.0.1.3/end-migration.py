@@ -265,7 +265,7 @@ def migrate_bu_auxiliary(env):
             ))
         if un:
             env.cr.execute("""
-            ISERT INTO account_analytic_tag_account_move_line_rel
+            INSERT INTO account_analytic_tag_account_move_line_rel
             (account_move_line_id, account_analytic_tag_id)
             VALUES (%s, %s)
             """, (
