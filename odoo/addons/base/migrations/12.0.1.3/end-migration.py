@@ -246,7 +246,11 @@ def migrate_bu_auxiliary(env):
     FROM account_move_line aml
         LEFT JOIN account_invoice_line ail ON aml.move_id = ail.id
         LEFT JOIN account_account aa ON aml.account_id = aa.id
-    WHERE LEFT(aa.code, 1) = '6' OR LEFT(aa.code, 1) = '7'
+    WHERE (   LEFT(aa.code, 1) = '6' 
+           OR LEFT(aa.code, 1) = '7')
+      AND (   aml.unitat_negoci_id IS NOT NULL
+           OR aml.numero_auxiliar_id IS NOT NULL
+           OR aml.tipus_auxiliar_id IS NOT NULL)
     """)
     for aml in env.cr.dictfetchall():
         # _logger.info(aml)
