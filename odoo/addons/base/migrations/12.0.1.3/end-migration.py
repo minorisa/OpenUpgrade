@@ -309,7 +309,7 @@ def migrate_bu_auxiliary(env):
         ))
 
     env.cr.execute("""
-    DROP TABLE IF EXIST account_analytic_tag_account_asset_rel;
+    DROP TABLE IF EXISTS account_analytic_tag_account_asset_rel;
     CREATE TABLE account_analytic_tag_account_asset_rel (
         account_asset_id INT NOT NULL,
         account_analytic_tag_id INT NOT NULL
