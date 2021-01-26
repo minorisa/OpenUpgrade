@@ -219,9 +219,13 @@ def migrate_bu_auxiliary(env):
         map_na[line.get("id")] = na.id
 
     # na general
+    ta_gen = oaag.create({
+        "name": "GENERAL",
+    }).id
     na_gen = oaaa.create({
         "code": "GENERAL",
         "name": "GENERAL",
+        "group_id": ta_gen,
     }).id
 
     # Create analytic lines & update invoice lines
@@ -301,8 +305,32 @@ def migrate_bu_auxiliary(env):
         WHERE id = %s
         """, (
             map_na.get(line.get("numero_auxiliar_id")) or na_gen,
-            line.get("id"),
+            line.get("id")
         ))
+
+    env.cr.execute("""
+    DROP TABLE IF EXIST account_analytic_tag_account_asset_rel;
+    CREATE TABLE account_analytic_tag_account_asset_rel (
+        account_asset_id INT NOT NULL,
+        account_analytic_tag_id INT NOT NULL
+    );
+    """)
+    env.cr.execute("""
+    SELECT id, unitat_negoci_id
+    FROM account_asset
+    WHERE unitat_negoci_id IS NOT NULL
+    """)
+    for asset in env.cr.dictfetchall():
+        bu = map_bu.get(asset.get("unitat_negoci_id"))
+        if bu:
+            env.cr.execute("""
+            INSERT INTO account_analytic_tag_account_asset_rel
+                (account_asset_id, account_analytic_tag_id)
+            VALUES (%s, %s)
+            """, (
+                asset.get("id"),
+                bu
+            ))
 
 
 @openupgrade.migrate()
