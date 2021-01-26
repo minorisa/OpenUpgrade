@@ -336,6 +336,33 @@ def migrate_bu_auxiliary(env):
                 bu
             ))
 
+    env.cr.execute("""
+    DROP TABLE IF EXISTS account_analytic_tag_account_pro_agreement_line_rel;
+    CREATE TABLE account_analytic_tag_account_pro_agreement_line_rel (
+        account_pro_agreement_line_id INT NOT NULL,
+        account_analytic_tag_id INT NOT NULL
+    );
+    """)
+    env.cr.execute("""
+    SELECT id, unitat_negoci_id
+    FROM account_pro_agreement_line
+    WHERE unitat_negoci_id IS NOT NULL
+    """)
+    for line in env.cr.dictfetchall():
+        bu = map_bu.get(line.get("unitat_negoci_id"))
+        if bu:
+            env.cr.execute("""
+            INSERT INTO account_analytic_tag_account_pro_agreement_line_rel
+                (account_pro_agreement_line_id, account_analytic_tag_id)
+            VALUES (%s, %s)
+            """, (
+                line.get("id"),
+                bu
+            ))
+
+
+
+
 
 @openupgrade.migrate()
 def migrate(env, version):
