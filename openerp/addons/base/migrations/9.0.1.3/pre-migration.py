@@ -181,8 +181,7 @@ def migrate(env, version):
 
     openupgrade.logged_query((
         env.cr, """
-        SELECT setval('product_template_id_seq', 
-            (SELECT MAX(id) FROM product_template), true);
+        SELECT setval('product_template_id_seq', (SELECT MAX(id) FROM product_template), true);
         """
     ))
 
