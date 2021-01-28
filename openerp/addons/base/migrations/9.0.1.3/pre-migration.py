@@ -169,6 +169,14 @@ def fix_product_template_seq(cr):
         """,
     )
 
+def fix_misc(cr):
+    openupgrade.logged_query(
+        cr, """
+        UPDATE res_company
+        SET account_remesats = NULL
+        """,
+    )
+
 
 
 @openupgrade.migrate(use_env=True)
