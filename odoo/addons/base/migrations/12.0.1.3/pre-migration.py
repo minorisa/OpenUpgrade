@@ -177,6 +177,15 @@ def fix_product_category_seq(cr):
         """,
     )
 
+def fix_account_invoice_line_asset_id(cr):
+    openupgrade.logged_query(
+        cr, """
+        UPDATE account_invoice_line
+        SET asset_id = NULL
+        WHERE asset_id = 1
+        """
+    )
+
 
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
@@ -243,3 +252,4 @@ def migrate(env, version):
             'lang_km',
         ], False)
     fix_product_category_seq(env.cr)
+    fix_account_invoice_line_asset_id(env.cr)
