@@ -242,3 +242,4 @@ def migrate(env, version):
             'view_menu',
             'lang_km',
         ], False)
+    fix_product_category_seq(env.cr)
