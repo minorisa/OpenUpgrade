@@ -157,6 +157,14 @@ def propagate_currency_company(env):
         """,
     )
 
+def fix_product_template_seq(cr):
+    openupgrade.logged_query(
+        cr, """
+        SELECT setval('product_template_id_seq', (SELECT MAX(id) FROM product_template), true)
+        """,
+    )
+
+
 
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
@@ -178,12 +186,7 @@ def migrate(env, version):
     switch_noupdate_flag(env.cr)
     rename_utm(env)
     propagate_currency_company(env)
-
-    openupgrade.logged_query((
-        env.cr, """
-        SELECT setval('product_template_id_seq', (SELECT MAX(id) FROM product_template), true)
-        """
-    ))
+    fix_product_template_seq(env.cr)
 
 
 def pre_create_columns(cr):
