@@ -170,6 +170,14 @@ def fill_ir_attachment_res_model_name(cr):
         )
 
 
+def fix_product_category_seq(cr):
+    openupgrade.logged_query(
+        cr, """
+        SELECT setval('product_category_id_seq', (SELECT MAX(id) FROM product_category), true)
+        """,
+    )
+
+
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
     openupgrade.remove_tables_fks(env.cr, _obsolete_tables)
