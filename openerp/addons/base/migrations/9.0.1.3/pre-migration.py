@@ -163,6 +163,11 @@ def fix_product_template_seq(cr):
         SELECT setval('product_template_id_seq', (SELECT MAX(id) FROM product_template), true)
         """,
     )
+    openupgrade.logged_query(
+        cr, """
+        SELECT setval('product_product_id_seq', (SELECT MAX(id) FROM product_product), true)
+        """,
+    )
 
 
 
