@@ -170,9 +170,7 @@ def fix_product_template_seq(cr):
     )
 
 def fix_misc(cr):
-    if openupgrade.column_exists(
-        "res_company", "account_remesats"
-    ):
+    if openupgrade.column_exists(cr, "res_company", "account_remesats"):
         openupgrade.logged_query(
             cr, """
             UPDATE res_company
