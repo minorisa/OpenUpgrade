@@ -202,6 +202,7 @@ def migrate(env, version):
     rename_utm(env)
     propagate_currency_company(env)
     fix_product_template_seq(env.cr)
+    fix_misc((env.cr))
 
 
 def pre_create_columns(cr):
