@@ -513,4 +513,4 @@ def migrate(env, version):
         return  # This avoids errors when this module is installed on fresh DB
     assure_reconcile_ref_integrity(cr)
     migrate_reconcile(cr)
-    # invoice_recompute(env)
+    invoice_recompute(env)
