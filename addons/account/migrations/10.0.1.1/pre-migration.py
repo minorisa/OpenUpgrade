@@ -18,7 +18,7 @@ def migrate(env, version):
         ]
     )
     if not openupgrade.has_column(
-        cr, "account.invoice", "amount_tax_signed"
+        cr, "account_invoice", "amount_tax_signed"
     ):
         cr.execute("""
         ALTER TABLE account_invoice
