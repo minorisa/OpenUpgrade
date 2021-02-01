@@ -17,3 +17,10 @@ def migrate(env, version):
             ('account_operation_template', 'account_reconcile_model'),
         ]
     )
+    if not openupgrade.has_column(
+        cr, "account.invoice", "amount_tax_signed"
+    ):
+        cr.execute("""
+        ALTER TABLE account_invoice
+        ADD COLUMN amount_tax_signed NUMERIC
+        """)
