@@ -420,3 +420,4 @@ def migrate(env, version):
     if openupgrade.table_exists(
             env.cr, 'account_unitat_negoci'):
         migrate_bu_auxiliary(env)
+    migrate_mandates(env)
