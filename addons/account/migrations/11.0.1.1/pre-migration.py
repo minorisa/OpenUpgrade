@@ -49,3 +49,9 @@ def migrate(env, version):
              'monetary', False, 'account'),
         ]
     )
+
+    if not openupgrade.column_exists(
+        env.cr, "res_partner_bank", "acc_type"):
+        openupgrade.logged_query(env.cr, """
+        ALTER TABLE res_partner_bank ADD COLUMN acc_type INT
+        """)
