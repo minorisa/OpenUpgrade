@@ -361,50 +361,6 @@ def migrate_bu_auxiliary(env):
             ))
 
 
-def migrate_mandates(env):
-    cr = env.cr
-    openupgrade.logged_query(cr, """
-        INSERT INTO account_banking_mandate 
-        (id, create_uid, create_date, write_date, write_uid,
-         partner_bank_id, last_debit_date, scan, company_id, state,
-         unique_mandate_reference, signature_date, sepa_migrated,
-         original_mandate_identification, recurrent_sequence_type, type,
-         scheme, format)
-        SELECT id, create_uid, create_date, write_date, write_uid,
-          partner_bank_id, last_debit_date, scan, company_id, state,
-          unique_mandate_reference, signature_date, sepa_migrated,
-          original_mandate_identification, recurrent_sequence_type, type,
-          'CORE', 'sepa'
-        FROM sdd_mandate""")
-
-    cr.execute(
-        'ALTER TABLE banking_export_sdd '
-        'RENAME TO migration_banking_export_sdd')
-    cr.execute(
-        'ALTER TABLE account_payment_order_sdd_rel '
-        'RENAME TO migration_account_payment_order_sdd_rel')
-
-    cr.execute("""
-       SELECT
-        old_sepa.file,
-        rel.account_order_id AS payment_order_id,
-        account_payment_order.reference
-        FROM migration_banking_export_sdd old_sepa
-        LEFT JOIN migration_account_payment_order_sdd_rel rel
-          ON old_sepa.id=rel.banking_export_sepa_id
-        LEFT JOIN account_payment_order 
-          ON account_payment_order.id=rel.account_order_id
-    """)
-    for sepa_file in cr.dictfetchall():
-        filename = 'sdd_%s.xml' % sepa_file['reference'].replace('/', '-')
-        env['ir.attachment'].sudo().create({
-                'name': filename,
-                'res_id': sepa_file['payment_order_id'],
-                'res_model': 'account.payment.order',
-                'datas': str(sepa_file['file']),
-                })
-
-
 @openupgrade.migrate()
 def migrate(env, version):
     openupgrade.disable_invalid_filters(env)
@@ -420,4 +376,3 @@ def migrate(env, version):
     if openupgrade.table_exists(
             env.cr, 'account_unitat_negoci'):
         migrate_bu_auxiliary(env)
-    migrate_mandates(env)
