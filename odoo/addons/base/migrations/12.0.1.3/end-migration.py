@@ -234,7 +234,7 @@ def migrate_bu_auxiliary(env):
         aml.id AS aml_id,
         aml.name AS aml_name,
         aml.date AS aml_date,
-        ROUND(COALESCE(aml.debit, 0) - COALESCE(aml.credit, 0), 2) AS aml_amount,
+        ROUND(COALESCE(aml.credit, 0) - COALESCE(aml.debit, 0), 2) AS aml_amount,
         aml.ref AS aml_ref,
         aml.account_id AS aml_account_id,
         aml.partner_id AS aml_partner_id,
@@ -358,6 +358,14 @@ def migrate_bu_auxiliary(env):
             """, (
                 line.get("id"),
                 bu
+            ))
+            env.cr.execute("""
+            UPDATE account_pro_agreement_line
+            SET analytic_id = %s
+            WHERE id = %s
+            """, (
+                na_gen,
+                line.get("id"),
             ))
 
 
