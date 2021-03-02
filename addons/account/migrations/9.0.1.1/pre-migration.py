@@ -456,3 +456,10 @@ def migrate(env, version):
              'monetary', False, 'account'),
         ]
     )
+
+    cr.execute("""
+    ALTER TABLE account_invoice
+    ADD COLUMN cc_amount_untaxed numeric,
+    ADD COLUMN cc_amount_tax numeric,
+    ADD COLUMN cc_amount_total numeric
+    """)
