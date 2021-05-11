@@ -816,6 +816,6 @@ def migrate(env, version):
         env.cr,
         """
         DELETE FROM ir_model_fields
-        WHERE model = 'mail.message' AND name = 'notified_partner_ids
+        WHERE model = 'mail.message' AND name = 'notified_partner_ids'
         """
     )
