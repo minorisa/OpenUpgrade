@@ -871,9 +871,15 @@ class AccountMove(models.Model):
             elif self.partner_id:
                 # Retrieve account from partner.
                 if self.is_sale_document(include_receipts=True):
-                    return self.partner_id.property_account_receivable_id
+                    account = self.partner_id.property_account_receivable_id
                 else:
-                    return self.partner_id.property_account_payable_id
+                    account = self.partner_id.property_account_payable_id
+                if account.company_id.id != self.company_id.id:
+                    account = self.env["account.account"].search([
+                        ("company_id", "=", self.company_id.id),
+                        ("code", "=", account.code),
+                    ])
+                return account
             else:
                 # Search new account.
                 domain = [

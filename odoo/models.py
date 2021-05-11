@@ -3245,7 +3245,6 @@ Fields:
             company_msg = _("- Record is company %(company)r and %(field)r (%(fname)s: %(values)s) belongs to another company.")
             record_msg = _("- %(record)r belongs to company %(company)r and %(field)r (%(fname)s: %(values)s) belongs to another company.")
             for record, name, corecords in inconsistencies[:5]:
-                _logger.error("%d :::: %d ++++++ %d" % (record.account_id.id, record.id, record.partner_id.id))
                 if record._name == 'res.company':
                     msg, company = company_msg, record
                 else:
