@@ -812,3 +812,10 @@ def migrate(env, version):
         """UPDATE ir_model_data
         SET noupdate=FALSE
         WHERE model='ir.model' AND noupdate IS NULL""")
+    openupgrade.logged_query(
+        env.cr,
+        """
+        DELETE FROM ir_model_fields
+        WHERE model = 'mail.message' AND name = 'notified_partner_ids
+        """
+    )
